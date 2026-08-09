@@ -15,7 +15,7 @@ from typing import Any, Optional, Type, get_args, get_type_hints
 
 from jinja2 import BaseLoader, Environment
 
-# Python 3.11+ native TOML support con fallback per versioni precedenti
+# Python 3.11+ native TOML support with fallback for older versions
 try:
     import tomllib
 except ImportError:
@@ -464,17 +464,9 @@ class Loader:
     }
 
     def __init__(self):
-        container_cls = globals().get("Container")
-        if container_cls is None:
-            try:
-                from framework.service.container import Container
-                container_cls = Container
-            except ImportError as exc:
-                raise RuntimeError("Container non disponibile.") from exc
-
         self.framework = Framework()
         self.infra = Infrastructure()
-        self.container = container_cls()
+        self.container = None
         self.handle = Handle(self)
         self.current_config = {}
         self.kwargs = {}
@@ -716,6 +708,8 @@ class Loader:
         schemes = await self.load_schemes(
             ["src/framework/scheme", "src/application/model"]
         )
+        
+        # 1. Caricamento dinamico dei moduli di core (incluso container.py)
         await self.framework.load_core(
             self.services,
             self.ports,
@@ -726,6 +720,19 @@ class Loader:
                 }
             },
         )
+
+        # 2. Risoluzione dinamica di Container dopo che load_core() lo ha registrato
+        container_mod = sys.modules.get("framework.service.container")
+        if not container_mod or not hasattr(container_mod, "Container"):
+            raise RuntimeError(
+                "Impossibile trovare la classe Container in 'framework.service.container'"
+            )
+
+        container_cls = getattr(container_mod, "Container")
+        self.container = container_cls()
+
+        # 3. Registrazione del container nel container stesso (per DI)
+        self.container.put(container_cls, self.container, singleton=True)
 
         try:
             config = tomllib.loads(Path(config_file).read_text(encoding="utf-8"))
