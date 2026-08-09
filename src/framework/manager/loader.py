@@ -1076,3 +1076,84 @@ class Loader:
         app = Application(self.container, self, instances, session)
         self.app = app
         return app
+
+    async def install(self, config_or_path: Any = "pyproject.toml") -> None:
+        """
+        Scansiona e installa SOLO le dipendenze e contratti degli adapter abilitati in pyproject.toml.
+        """
+        import subprocess
+        import hashlib
+
+        if isinstance(config_or_path, dict):
+            config_file = config_or_path.get('config', 'pyproject.toml')
+        else:
+            config_file = str(config_or_path)
+
+        print(f"\n[*] Caricamento configurazione da '{config_file}'...")
+        try:
+            config = tomli.loads(open(config_file, "rb").read().decode())
+        except Exception as e:
+            print(f"[!] Errore nel caricare '{config_file}': {e}")
+            return
+
+        print("[*] Individuazione adapter abilitati in pyproject.toml...")
+        enabled_adapters = []
+
+        # Scansiona tutte le chiavi nel toml escluse 'project' e 'manager'
+        for port_key, port_val in config.items():
+            if port_key in ("project", "manager"):
+                continue
+            if isinstance(port_val, dict):
+                for adapter_name in port_val.keys():
+                    enabled_adapters.append((port_key, adapter_name))
+
+        if not enabled_adapters:
+            print("[*] Nessun adapter abilitato trovato in pyproject.toml.")
+            return
+
+        print(f"[*] Adapter abilitati attivi ({len(enabled_adapters)}):")
+        for port_key, adapter_name in enabled_adapters:
+            print(f"  - [{port_key}] {adapter_name}")
+
+        contracts = []
+        all_requires = set()
+
+        for port_key, adapter_name in enabled_adapters:
+            base_path = f"src/infrastructure/{port_key}/{adapter_name}"
+            contract_path = f"{base_path}.contract.json"
+            if not os.path.exists(contract_path):
+                contract_path = f"{base_path}.json"
+
+            if os.path.exists(contract_path):
+                try:
+                    with open(contract_path, "r", encoding="utf-8") as f:
+                        content = f.read().strip()
+                        if content:
+                            data = json.loads(content)
+                            contracts.append((contract_path, base_path, data))
+                            for req in data.get("requires", []):
+                                all_requires.add(req)
+                except Exception as e:
+                    print(f"[!] Errore lettura contratto '{contract_path}': {e}")
+
+        # 1. Installazione dipendenze 'requires' per gli adapter abilitati
+        if all_requires:
+            req_list = sorted(list(all_requires))
+            print(f"\n[*] Dipendenze 'requires' rilevate per gli adapter abilitati ({len(req_list)}):")
+            for req in req_list:
+                print(f"  - {req}")
+
+            print("[*] Installazione pacchetti in corso via pip...")
+            cmd = [sys.executable, "-m", "pip", "install"] + req_list
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print("[✓] Dipendenze installate con successo!")
+                else:
+                    print(f"[!] Errore durante pip install:\n{result.stderr}")
+            except Exception as e:
+                print(f"[!] Impossibile eseguire il processo di installazione: {e}")
+        else:
+            print("\n[*] Nessuna dipendenza 'requires' specificata nei contratti degli adapter abilitati.")
+
+        print("\n[✓] Procedura --install completata per gli adapter abilitati.\n")

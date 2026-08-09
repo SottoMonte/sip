@@ -12,6 +12,10 @@ from framework.manager.loader import Loader
 async def main(config):
     loader_instance = Loader()
     
+    if config.get('install'):
+        await loader_instance.install(config)
+        return
+
     # Usa il parametro passato dal terminale
     app = await loader_instance.bootstrap(config)
     
@@ -35,6 +39,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--debug", action="store_true", help="Abilita la modalità debug")
     parser.add_argument("--dev", action="store_true", help="Abilita la modalità dev")
+    parser.add_argument("--install", action="store_true", help="Installa le dipendenze del framework")
+    parser.add_argument("--test", action="store_true", help="Esegue i test del framework")
 
     args = parser.parse_args()
     args_dict = vars(args)

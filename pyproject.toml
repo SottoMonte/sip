@@ -39,8 +39,8 @@ path = "src/"
 watch = true
 message = "broker"
 
-[[network.neural]]
-name = "decoder"
-input = 40
-hidden = 2048
-output = 2048
+#[[network.neural]]
+#name = "decoder"
+#input = 40
+#hidden = 2048
+#output = 2048

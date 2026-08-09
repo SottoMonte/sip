@@ -365,7 +365,7 @@ class Port(ABC):
     async def rebuild(self, node_id, view=None, context=dict()):
         pass
 
-    async def render_reactive(self, session, view: Any, context) -> Any:
+    async def render_reactive(self, session, view, context):
         file_path = f"src/application/controller/{dsl_alias}.dsl"
         content = await self.presenter.get_view(file_path)
         await self.executor.add_file(file_path, content)
