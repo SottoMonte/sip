@@ -35,14 +35,14 @@ def resolve_filter(raw: str | None) -> str | None:
     return raw
 
 
-class tester:
-    def __init__(self, filter_value: str | None = None, loader=None, defender=None,
-                 messenger=None, executor=None, **_ignored):
-        self.loader    = loader
+class Manager:
+    def __init__(self, **constants):
+        '''self.loader    = loader
         self.defender  = defender
         self.messenger = messenger
         self.executor  = executor
-        self.prefix    = resolve_filter(filter_value)
+        self.prefix    = resolve_filter(filter_value)'''
+        pass
 
     # ── helpers ──────────────────────────────────────────────────────────────
 

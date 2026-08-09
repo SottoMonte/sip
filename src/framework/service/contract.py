@@ -1,3 +1,5 @@
+import os
+
 class Contract:
     """Gestione dei contratti (*.contract.json / *.json) associati a un
     qualunque file sorgente — non solo adapter: manager, service, port, ecc.

@@ -1,3 +1,5 @@
+import os
+
 class Reflection:
     """Utility di reflection sui moduli Python."""
 
