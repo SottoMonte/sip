@@ -1,44 +1,48 @@
 {
-    "port": {
-        "builder": {
-            "production": "0df993bf66648fdc31f3a752dd1842c5101a6c9ee04e2e96d90aaa64a4809455",
-            "test": "f1fb74a3015b979facf26c02cedadcaefc39b705036defd32962224eacad4f75"
-        },
-        "parse_route": {
-            "production": "752a6201abc04728ed4fb9176d9c8c3c0737d12d9ff8d9bb302ee41e347af1a8",
-            "test": "bf36999104450b2948972e172eb9f0994522e65b7d791a0802ff32fa0f8829ce"
-        },
-        "initialize": {
-            "production": "7edc726be794135caffe72e19ffbe73f8165121bd8be8107b932c5ef08fc4022",
-            "test": "d045fab95e37f23eb8c9f3074675fad9fd6cbd44e32a18c81cc15fac1d9159f6"
-        },
-        "rebuild": {
-            "production": "cbe635a7e344eecde6dbc2cc344a001281225de2d7380917edc24e134fa20511",
-            "test": "6756a184ab4b9b4a64a2d19eb02f0cd6221602d4381a6d8122c4bcdc0bacde57"
-        },
-        "render_view": {
-            "production": "4217ab75c1b91cc41b11941b13b1b7165f148e9f9ea3737fd94bd2f2869c3a82",
-            "test": "e62fac89dbc887140bd40f9f85ae4b0d36d9d4af4006147a16301a7d82b20691"
-        },
-        "render_css": {
-            "production": "9c726fe9b5dc110f1a74d6f8f183439685259667d5b1432973c5b1374dd734c0",
-            "test": "f417bbd657418b843bc1173821adbf7170e795deecba89e7baa5c18aa34423ac"
-        },
-        "render_widget": {
-            "production": "ed7ff9fea57c2a6d7e1b7ef407141676e6860f0ff79f4566f80be2ea0d7c006c",
-            "test": "e42f95a0a4a6a6a3382f3c7267d3ae17e3751615949b4aa9c56bf70a8eea3ffb"
-        },
-        "mount_widget": {
-            "production": "7efac9bbcb06f2e756bd9a1b47dc11f853b727d03cd19d34ac57e47885bf7cd9",
-            "test": "89ab02cd39cd0d920cf59d8cf36baff47c7527618b32867477634cb0835fcecc"
-        },
-        "set_attribute": {
-            "production": "ddd48ada173e2edcbd5064b07060236efd404392e17fb6d022982f2087175308",
-            "test": "e46d1e6753e23f52bf986ead9c27675acb93d731ace4386351b5522a2add098f"
-        },
-        "get_attribute": {
-            "production": "76de31ebec6c161462f3d87ecfe8913f68e47fc2255ed4448bd1b57fbec63221",
-            "test": "7c4e09c9523f484c71922a6fe15cca4b2083a585ef063215f030d992402d3836"
-        }
+  "hashes": {
+    "Port": {
+      "initialize": {
+        "production": "929b5c905c99bddcf98a575dd386f7b46ee0a3b5aeebf11d48af5bc5800d6bac"
+      },
+      "mount_view": {
+        "production": "5d8f2209b38411f61174f27a573524b616d9d5f9b224fb9ab78fe1f372a9bbbf"
+      },
+      "mount_route": {
+        "production": "81d628aa243cba965bc84f5de7b3fe6387530c32087189d755e1c1b6294eb557"
+      },
+      "mount_css": {
+        "production": "d88ddbbf7228fed9edb1a6856ebd17da91b532b82466fa4bc7bee659362dced4"
+      },
+      "mount_tag": {
+        "production": "87b0fae05842748b39fd480b55327ed28656dd2f84b0690ced82cbe88d73bac1"
+      },
+      "node_create": {
+        "production": "73bf18685ec6fe4496edae767ad15600701f1ab1092722de78ac5af55e27ebfd"
+      },
+      "node_update": {
+        "production": "9521e0a4100f059a05a59d6a84533ed07538381e6c0499f14ddc9198ab718fc3"
+      },
+      "node_union": {
+        "production": "c7679b9adcd4dbc0a66e1de89f46eb2c5757932fbccbfcec23a86dfb7ff5be9d"
+      },
+      "node_get": {
+        "production": "26b0fd7793cb4c38a1c700c1082246a041c5563bc71150f9f303274b77ce6473"
+      },
+      "rebuild": {
+        "production": "4c00416c3e3ae09f14ac58ffebf4f1fffbbd68aff2aeb6ed1e0fdaafcc122b05"
+      },
+      "render_reactive": {
+        "production": "c182a523e6b41bb3e030c7f4bfa21a71c620ddf32720b9895df60f8addae3321"
+      },
+      "parse_route": {
+        "production": "2aa5b2d873d35c635085646fdd5212996fd227fbcfc3b7d6c3aa005f4bee3b4a"
+      },
+      "render_template": {
+        "production": "9b51f3e749a37fb6a4a2e764376b25a6fa0255cd80a324e5cb4bd59a220f3999"
+      },
+      "render_node": {
+        "production": "45f57d8d6a7bcb1b90551597c6f9415a7e4e1bb11b6a8d6dda51c5ed38405c51"
+      }
     }
+  }
 }
