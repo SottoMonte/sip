@@ -1,4 +1,7 @@
 import os
+import inspect
+import hashlib
+from pathlib import Path
 
 class Reflection:
     """Utility di reflection sui moduli Python."""

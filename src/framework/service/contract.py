@@ -1,4 +1,7 @@
 import os
+import framework.service.introspection as introspection
+from pathlib import Path
+import json
 
 class Contract:
     """Gestione dei contratti (*.contract.json / *.json) associati a un
@@ -90,7 +93,7 @@ class Contract:
         if not os.path.exists(contract_path):
             return True
 
-        components = Reflection.module_components(module)
+        components = introspection.Reflection.module_components(module)
         if not components:
             return True
 
@@ -99,7 +102,7 @@ class Contract:
 
         stale = []
         for name, source in components.items():
-            current = Reflection.hash_text(source)
+            current = introspection.Reflection.hash_text(source)
             entry = Contract._entry(hashes, name)
             tested = entry.get("test")
             entry["production"] = current

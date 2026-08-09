@@ -244,7 +244,8 @@ class Framework:
         resource.module = module
         self.components[resource.name] = resource
 
-        contract = globals().get("Contract")
+        contract_mod = sys.modules.get("framework.service.contract")
+        contract = getattr(contract_mod, "Contract", None) if contract_mod else globals().get("Contract")
         if contract is not None:
             contract.verify_module(resource.path, module, self.strict)
 
@@ -439,14 +440,14 @@ class Loader:
         "factory": "src/framework/service/factory.py",
         "language": "src/framework/service/language.py",
         "scheme": "src/framework/service/scheme.py",
+        "manage": "src/framework/port/manage.py",
         "container": "src/framework/service/container.py",
         "introspection": "src/framework/service/introspection.py",
+        "contract": "src/framework/service/contract.py",
         "diagnostics": "src/framework/service/diagnostic.py",
-        'contract': 'src/framework/service/contract.py',
     }
 
     ports = {
-        "manage": "src/framework/port/manage.py",
         "message": "src/framework/port/message.py",
         "presentation": "src/framework/port/presentation.py",
         "persistence": "src/framework/port/persistence.py",
@@ -645,7 +646,11 @@ class Loader:
 
     def record_contract(self, test_path: str, outcome: dict):
         """Registra i risultati dei test di contratto."""
-        contract, reflection = globals().get("Contract"), globals().get("Reflection")
+        contract_mod = sys.modules.get("framework.service.contract")
+        contract = getattr(contract_mod, "Contract", None) if contract_mod else globals().get("Contract")
+        
+        reflect_mod = sys.modules.get("framework.service.introspection")
+        reflection = getattr(reflect_mod, "Reflection", None) if reflect_mod else globals().get("Reflection")
         if not contract or not reflection:
             return
 
@@ -793,7 +798,8 @@ class Loader:
         for p_key, a_name in enabled_adapters:
             print(f"  - [{p_key}] {a_name}")
 
-        contract_cls = globals().get("Contract")
+        contract_mod = sys.modules.get("framework.service.contract")
+        contract_cls = getattr(contract_mod, "Contract", None) if contract_mod else globals().get("Contract")
         if not contract_cls:
             print("[!] Contract non disponibile.")
             return
