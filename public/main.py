@@ -2,22 +2,44 @@ import sys
 import os
 import asyncio
 import argparse
+import subprocess
 
 # Setup del path
 cwd = os.getcwd()
 sys.path.insert(1, cwd + '/src')
 
-from framework.manager.loader import Loader
 
+
+def setup_core_dependencies():
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-e",
+            cwd,
+        ],
+        check=True,
+    )
 
 async def main(config):
-    loader_instance = Loader()
+
+    if config.get('setup'):
+        setup_core_dependencies()
+        from framework.manager.loader import Loader
+        loader_instance = Loader()
+        await loader_instance.install(config)
+        return
+    else:
+        from framework.manager.loader import Loader
+        loader_instance = Loader()
+        
 
     if config.get('install'):
         await loader_instance.install(config)
         return
 
-    # Usa il parametro passato dal terminale
     app = await loader_instance.bootstrap(config)
 
     try:
@@ -52,6 +74,11 @@ if __name__ == "__main__":
         default=None,      # se --test non è dato: None
         metavar="FILTER",
         help="Esegue i test del framework. Filtro opzionale es: services, managers, infrastructure/message"
+    )
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="Prepara l'ambiente e installa le dipendenze degli adapter configurati"
     )
     parser.add_argument(
         "--skip-verify",

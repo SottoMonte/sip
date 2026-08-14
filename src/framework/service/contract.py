@@ -1,5 +1,4 @@
 import os
-import framework.service.introspection as introspection
 from pathlib import Path
 import json
 
@@ -82,6 +81,7 @@ class Contract:
 
     @staticmethod
     def verify_module(source_path: str, module, strict: bool) -> bool:
+        import framework.service.introspection as introspection
         """Chiamato al caricamento di qualunque componente: se esiste un
         contratto accanto al file, verifica ogni suo componente pubblico
         (metodi di classi + funzioni di modulo) contro l'hash registrato al

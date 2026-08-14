@@ -1,6 +1,9 @@
 import re
 import json
-import tomli
+try:
+    import tomllib as tomli
+except ImportError:
+    import tomli
 import hashlib
 import copy
 from urllib.parse import urlparse, urlencode
