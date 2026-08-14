@@ -1,4 +1,8 @@
 {
+  "requires": [
+    "bs4",
+    "untangle"
+  ],
   "hashes": {
     "Port": {
       "initialize": {

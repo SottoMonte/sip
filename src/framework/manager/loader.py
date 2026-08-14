@@ -775,48 +775,31 @@ class Loader:
         self.app = app
         return app
 
-    async def install(
-        self,
-        config_or_path: Any = "pyproject.toml",
-    ):
+    async def install(self, config_or_path: Any = "pyproject.toml") -> bool:
         """
-        Installa le dipendenze dichiarate dai contract.
+        Analizza i contract del framework e degli adapter/port attivi
+        e installa tutte le dipendenze dichiarate tramite 'requires'.
 
-        IMPORTANTE:
+        NON esegue il bootstrap completo del framework.
+        NON istanzia container, manager o adapter.
 
-        --install è autonomo dal bootstrap.
-
-        Carica direttamente Contract usando il normale
-        Framework.load_module() già presente nel Loader.
-
-        Non vengono caricati:
-            flow
-            factory
-            language
-            scheme
-            container
-            adapter
-            ecc.
-
-        prima che le relative dipendenze siano installate.
+        Utilizza il normale Framework.load_module() per caricare
+        autonomamente Contract.
         """
 
-        # ========================================================
+        # ============================================================
         # 1. CONFIGURAZIONE
-        # ========================================================
+        # ============================================================
 
         config_file = (
-            config_or_path.get(
-                "config",
-                "pyproject.toml",
-            )
+            config_or_path.get("config", "pyproject.toml")
             if isinstance(config_or_path, dict)
             else str(config_or_path)
         )
 
         print(
-            f"\n[*] Caricamento configurazione "
-            f"da '{config_file}'..."
+            f"\n[*] Caricamento configurazione da "
+            f"'{config_file}'..."
         )
 
         try:
@@ -825,7 +808,6 @@ class Loader:
                     encoding="utf-8"
                 )
             )
-
         except Exception as exc:
             print(
                 f"[!] Errore nel caricare "
@@ -833,23 +815,24 @@ class Loader:
             )
             return False
 
-        # ========================================================
+        # ============================================================
         # 2. ADAPTER ATTIVI
-        # ========================================================
+        # ============================================================
 
-        enabled_adapters = [
-            (port_name, adapter_name)
-            for port_name, port_config in config.items()
-            if port_name not in (
-                "project",
-                "manager",
-            )
-            and isinstance(
-                port_config,
-                dict,
-            )
-            for adapter_name in port_config.keys()
-        ]
+        enabled_adapters = []
+
+        for port_name, port_config in config.items():
+
+            if port_name in ("project", "manager"):
+                continue
+
+            if not isinstance(port_config, dict):
+                continue
+
+            for adapter_name in port_config:
+                enabled_adapters.append(
+                    (port_name, adapter_name)
+                )
 
         if enabled_adapters:
 
@@ -858,47 +841,33 @@ class Loader:
                 f"({len(enabled_adapters)}):"
             )
 
-            for port_name, adapter_name in (
-                enabled_adapters
-            ):
+            for port_name, adapter_name in enabled_adapters:
                 print(
                     f"  - [{port_name}] "
                     f"{adapter_name}"
                 )
 
         else:
-
             print(
                 "[*] Nessun adapter abilitato trovato."
             )
 
-        # ========================================================
+        # ============================================================
         # 3. CARICA CONTRACT
-        #
-        # USA IL load_module() GIÀ ESISTENTE.
-        # NON creiamo _load_module_direct().
-        # ========================================================
+        # ============================================================
 
-        contract_module_name = (
-            "framework.service.contract"
-        )
+        contract_name = "framework.service.contract"
 
-        contract_mod = sys.modules.get(
-            contract_module_name
-        )
+        contract_mod = sys.modules.get(contract_name)
 
         if contract_mod is None:
 
-            contract_path = self.services.get(
-                "contract"
-            )
+            contract_path = self.services.get("contract")
 
             if not contract_path:
-
                 print(
                     "[!] Contract non disponibile."
                 )
-
                 return False
 
             print(
@@ -907,22 +876,15 @@ class Loader:
             )
 
             try:
-
-                contract_mod = (
-                    await self.framework.load_module(
-                        contract_module_name,
-                        contract_path,
-                        None,
-                    )
+                contract_mod = await self.framework.load_module(
+                    contract_name,
+                    contract_path,
                 )
-
             except Exception as exc:
-
                 print(
-                    "[!] Impossibile caricare "
-                    f"Contract: {exc}"
+                    f"[!] Impossibile caricare Contract: "
+                    f"{exc}"
                 )
-
                 return False
 
         contract_cls = getattr(
@@ -932,32 +894,26 @@ class Loader:
         )
 
         if contract_cls is None:
-
             print(
                 "[!] Il modulo "
                 "'framework.service.contract' "
                 "non contiene la classe Contract."
             )
-
             return False
 
-        print(
-            "[✓] Contract caricato."
-        )
+        print("[✓] Contract caricato.")
 
-        # ========================================================
-        # 4. COSTRUISCI ELENCO COMPONENTI
-        # ========================================================
+        # ============================================================
+        # 4. COSTRUISCI LE SORGENTI DA ANALIZZARE
+        # ============================================================
 
         sources = []
 
-        # --------------------------------------------------------
-        # SERVICE
-        # --------------------------------------------------------
+        # ------------------------------------------------------------
+        # SERVICES
+        # ------------------------------------------------------------
 
-        for service_name, service_path in (
-            self.services.items()
-        ):
+        for service_name, service_path in self.services.items():
 
             if service_name == "contract":
                 continue
@@ -970,18 +926,25 @@ class Loader:
                 )
             )
 
-        # --------------------------------------------------------
-        # ADAPTER ATTIVI
-        #
-        # Qui è meglio NON costruire il path a mano se il tuo
-        # Loader possiede già una mappa degli adapter.
-        #
-        # Per ora manteniamo la struttura che stavi usando.
-        # --------------------------------------------------------
+        # ------------------------------------------------------------
+        # PORTS
+        # ------------------------------------------------------------
 
-        for port_name, adapter_name in (
-            enabled_adapters
-        ):
+        for port_name, port_path in self.ports.items():
+
+            sources.append(
+                (
+                    "port",
+                    port_name,
+                    port_path,
+                )
+            )
+
+        # ------------------------------------------------------------
+        # ADAPTER ATTIVI
+        # ------------------------------------------------------------
+
+        for port_name, adapter_name in enabled_adapters:
 
             adapter_path = (
                 f"src/infrastructure/"
@@ -997,23 +960,16 @@ class Loader:
                 )
             )
 
-        # ========================================================
-        # 5. ANALIZZA I CONTRACT
-        # ========================================================
+        # ============================================================
+        # 5. ANALISI CONTRACT
+        # ============================================================
 
         all_requires = set()
-
         contracts_found = 0
 
-        print(
-            "\n[*] Analisi dei contract..."
-        )
+        print("\n[*] Analisi dei contract...")
 
-        for (
-            component_type,
-            component_name,
-            source_path,
-        ) in sources:
+        for component_type, component_name, source_path in sources:
 
             source = Path(source_path)
 
@@ -1025,53 +981,54 @@ class Loader:
                     f"sorgente non trovato: "
                     f"{source_path}"
                 )
-
                 continue
 
-            # ----------------------------------------------------
-            # Trova il contract
-            # ----------------------------------------------------
+            # --------------------------------------------------------
+            # Trova contract
+            # --------------------------------------------------------
 
             try:
-
-                contract_path = (
-                    contract_cls.for_source(
-                        source_path
-                    )
+                contract_path = contract_cls.for_source(
+                    source_path
                 )
-
             except Exception as exc:
-
                 print(
                     f"  [!] [{component_type}] "
                     f"{component_name}: "
                     f"errore nel trovare contract: "
                     f"{exc}"
                 )
-
                 continue
 
-            # ----------------------------------------------------
-            # Contract opzionale
-            # ----------------------------------------------------
+            # --------------------------------------------------------
+            # Nessun contract
+            # --------------------------------------------------------
 
-            if not Path(contract_path).exists():
+            if not contract_path or not Path(contract_path).exists():
 
                 print(
                     f"  - [{component_type}] "
                     f"{component_name}: "
                     f"nessun contract"
                 )
-
                 continue
 
-            # ----------------------------------------------------
-            # Leggi JSON
-            # ----------------------------------------------------
+            # --------------------------------------------------------
+            # Leggi contract
+            # --------------------------------------------------------
 
-            data = contract_cls.read(
-                contract_path
-            )
+            try:
+                data = contract_cls.read(
+                    contract_path
+                )
+            except Exception as exc:
+                print(
+                    f"  [!] [{component_type}] "
+                    f"{component_name}: "
+                    f"errore lettura contract: "
+                    f"{exc}"
+                )
+                continue
 
             if not data:
 
@@ -1080,30 +1037,23 @@ class Loader:
                     f"{component_name}: "
                     f"contract vuoto"
                 )
-
                 continue
 
             contracts_found += 1
 
-            # ----------------------------------------------------
-            # REQUIREMENTS
-            # ----------------------------------------------------
+            # --------------------------------------------------------
+            # Requires
+            # --------------------------------------------------------
 
             requires = data.get(
                 "requires",
                 [],
             )
 
-            if isinstance(
-                requires,
-                str,
-            ):
+            if isinstance(requires, str):
                 requires = [requires]
 
-            if not isinstance(
-                requires,
-                list,
-            ):
+            if not isinstance(requires, list):
 
                 print(
                     f"  [!] [{component_type}] "
@@ -1111,7 +1061,6 @@ class Loader:
                     f"'requires' deve essere una "
                     f"stringa o una lista."
                 )
-
                 continue
 
             if not requires:
@@ -1119,9 +1068,13 @@ class Loader:
                 print(
                     f"  - [{component_type}] "
                     f"{component_name}: "
+                    f"nessun contract"
+                    if component_type == "service"
+                    else
+                    f"  - [{component_type}] "
+                    f"{component_name}: "
                     f"nessuna dipendenza"
                 )
-
                 continue
 
             print(
@@ -1136,24 +1089,20 @@ class Loader:
                     requirement,
                     str,
                 ):
-
                     print(
                         f"    [!] Dipendenza non valida: "
                         f"{requirement!r}"
                     )
-
                     continue
 
                 requirement = requirement.strip()
 
                 if requirement:
-                    all_requires.add(
-                        requirement
-                    )
+                    all_requires.add(requirement)
 
-        # ========================================================
+        # ============================================================
         # 6. NESSUNA DIPENDENZA
-        # ========================================================
+        # ============================================================
 
         if not all_requires:
 
@@ -1163,24 +1112,21 @@ class Loader:
             )
 
             if contracts_found == 0:
-
                 print(
                     "[!] Nessun contract trovato."
                 )
 
             print(
-                "\n[✓] --install completato.\n"
+                "\n[✓] Procedura --install completata.\n"
             )
 
             return True
 
-        # ========================================================
-        # 7. ELENCO FINALE
-        # ========================================================
+        # ============================================================
+        # 7. LISTA FINALE
+        # ============================================================
 
-        requirements = sorted(
-            all_requires
-        )
+        requirements = sorted(all_requires)
 
         print(
             f"\n[*] Dipendenze 'requires' rilevate "
@@ -1188,14 +1134,11 @@ class Loader:
         )
 
         for requirement in requirements:
+            print(f"  - {requirement}")
 
-            print(
-                f"  - {requirement}"
-            )
-
-        # ========================================================
-        # 8. INSTALLAZIONE PIP
-        # ========================================================
+        # ============================================================
+        # 8. INSTALLAZIONE
+        # ============================================================
 
         print(
             "\n[*] Installazione pacchetti "
@@ -1203,7 +1146,6 @@ class Loader:
         )
 
         try:
-
             result = subprocess.run(
                 [
                     sys.executable,
@@ -1215,24 +1157,20 @@ class Loader:
                 capture_output=True,
                 text=True,
             )
-
         except Exception as exc:
 
             print(
                 f"[!] Impossibile eseguire pip: "
                 f"{exc}"
             )
-
             return False
 
-        # ========================================================
+        # ============================================================
         # 9. OUTPUT PIP
-        # ========================================================
+        # ============================================================
 
         if result.stdout.strip():
-            print(
-                result.stdout
-            )
+            print(result.stdout)
 
         if result.returncode != 0:
 
@@ -1242,9 +1180,7 @@ class Loader:
             )
 
             if result.stderr.strip():
-                print(
-                    result.stderr
-                )
+                print(result.stderr)
 
             return False
 
@@ -1254,8 +1190,7 @@ class Loader:
         )
 
         print(
-            "\n[✓] Procedura --install "
-            "completata.\n"
+            "\n[✓] Procedura --install completata.\n"
         )
 
         return True
