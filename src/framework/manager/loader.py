@@ -1,5 +1,6 @@
 import ast
 import asyncio
+import importlib
 import importlib.util
 import inspect
 import json
@@ -161,6 +162,14 @@ class Infrastructure:
         if str(p).startswith("application/"):
             p = Path("src") / p
         return p.read_bytes().decode("utf-8")
+
+    async def import_module(self, module_path: str):
+        """Importa un modulo Python dinamicamente e lo rende disponibile nel DSL.
+        
+        :param module_path: Percorso del modulo (es. "framework.manager.tester")
+        :return: Il modulo importato
+        """
+        return importlib.import_module(module_path)
 
 
 # ============================================================
@@ -444,7 +453,7 @@ class Loader:
         "container": "src/framework/service/container.py",
         "introspection": "src/framework/service/introspection.py",
         "contract": "src/framework/service/contract.py",
-        "diagnostics": "src/framework/service/diagnostic.py",
+        "diagnostic": "src/framework/service/diagnostic.py",
     }
 
     ports = {
@@ -461,6 +470,7 @@ class Loader:
         "storekeeper": "src/framework/manager/storekeeper.py",
         "orchestrator": "src/framework/manager/orchestrator.py",
         "networker": "src/framework/manager/networker.py",
+        "tester": "src/framework/manager/tester.py",
     }
 
     def __init__(self):
@@ -774,6 +784,24 @@ class Loader:
         app = Application(self, managers, session)
         self.app = app
         return app
+
+    async def run_tests(self, filter_value: str | None = None) -> None:
+        """Esegue la suite di test DSL tramite il Manager del Tester.
+        
+        :param filter_value: Filtro opzionale per limitare i test eseguiti
+        """
+        managers = self.get_managers()
+        tester = managers.get("tester")
+        if tester is None:
+            print("[!] Manager 'tester' non trovato nel container")
+            return
+        
+        # Passa il filtro come constant al metodo run()
+        await tester.run(filter=filter_value)
+
+    async def import_module(self, module_path: str):
+        """Importa un modulo Python dinamicamente tramite l'infrastruttura."""
+        return await self.infra.import_module(module_path)
 
     async def install(self, config_or_path: Any = "pyproject.toml") -> bool:
         """

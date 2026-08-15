@@ -172,6 +172,228 @@ Assicurati sempre che il virtual environment sia attivo prima di eseguire comand
 
 ---
 
+## 🧪 Come Scrivere Buoni Test DSL (`.test.dsl`)
+
+I test DSL sono obbligatori in Framework Maintenance Mode. Seguire questi pattern garantisce test attendibili, manutenibili e che catturino davvero il comportamento del componente testato.
+
+### Struttura Base
+
+Un file `.test.dsl` ha tre sezioni:
+
+```dsl
+// Sezione 1: IMPORTS — Carica i moduli/risorse di cui il test ha bisogno
+imports: {
+    'module_name': import("framework.manager.some_manager"),
+    'helper_data': resource("src/path/to/file.json")
+};
+
+// Sezione 2: EXPORTS — Espone le funzioni da testare
+exports: {
+    'my_function': imports.module_name.my_function,
+    'my_other_function': imports.module_name.my_other_function
+};
+
+// Sezione 3: TEST SUITE — Definisce i test veri
+tuple:test_suite := (
+    { test_case_1_object },
+    { test_case_2_object },
+    ...
+);
+```
+
+### Anatomia di un Test Case
+
+```dsl
+{
+    "action":   exports.my_function,           // La funzione da testare
+    "inputs":   "arg" or ("arg1", "arg2") or {"key": "value"},  // Input(i)
+    "outputs":  "expected_result",             // Output atteso
+    "assert":   @received == @expected,        // Condizione di successo
+    "note":     "Descrizione leggibile del test"  // Documentazione
+}
+```
+
+**Dettagli:**
+
+- **`"action"`**: Puntatore alla funzione importata tramite `exports`. **Obbligatorio.**
+- **`"inputs"`**: Può essere:
+  - Una tupla (se la funzione richiede più argomenti): `("arg1", "arg2", arg3)`
+  - Un singolo valore (se la funzione richiede un solo argomento): `"string_arg"` o `123`
+  - Un dizionario (se la funzione è lazy e accetta kwargs): `{"key": "value", "other": true}`
+  - Una tupla di tuple per funzioni che prendono liste di tuple: `(("a", 1), ("b", 2))`
+- **`"outputs"`**: L'output atteso. Il framework lo assegnerà a `@expected`.
+- **`"assert"`**: Qualunque espressione DSL che ritorni `true`/`false`. I valori testati sono disponibili come:
+  - `@received` — il valore effettivo tornato dalla funzione
+  - `@expected` — il valore dichiarato in `"outputs"`
+  - Puoi scrivere asserzioni complesse: `@received == @expected & @received != null` (AND), `@received == "OK" | @received == "SKIP"` (OR)
+- **`"note"`**: Descrizione breve e leggibile del test, mostrata nei log quando passa o fallisce. **Obbligatoria.**
+
+### Pattern Consigliati
+
+#### ✅ Test Semplice: Eguaglianza Diretta
+```dsl
+{
+    "action": exports.resolve_filter;
+    "inputs": "managers";
+    "outputs": "src/framework/manager";
+    "assert": @received == @expected;
+    "note": "resolve_filter('managers') ritorna il percorso corretto";
+}
+```
+
+#### ✅ Test con Multipli Argomenti
+```dsl
+{
+    "action": exports.union;
+    "inputs": ({"a": 1}, {"b": 2});
+    "outputs": {"a": 1, "b": 2};
+    "assert": @received == @expected;
+    "note": "union() unisce due dizionari correttamente";
+}
+```
+
+#### ✅ Test con Asserzione Complessa
+```dsl
+{
+    "action": exports.validate_user;
+    "inputs": {"name": "Alice", "age": 25};
+    "outputs": true;
+    "assert": @received == @expected & @received != null;
+    "note": "validate_user accetta utente valido";
+}
+```
+
+#### ✅ Test di Edge Case
+```dsl
+{
+    "action": exports.get_item;
+    "inputs": ("items", "missing_key");
+    "outputs": null;
+    "assert": @received == @expected;
+    "note": "get_item ritorna null per chiave mancante (no crash)";
+}
+```
+
+#### ✅ Test di Negazione
+```dsl
+{
+    "action": exports.is_admin;
+    "inputs": {"role": "user"};
+    "outputs": false;
+    "assert": @received == @expected & @received != true;
+    "note": "is_admin ritorna false per utente non-admin";
+}
+```
+
+### 🚫 Anti-Pattern nei Test DSL
+
+1. **Asserzioni che sempre passano** (dead test):
+   ```dsl
+   // ❌ SBAGLIATO — @received e @expected sono sempre uguali qui
+   {
+       "action": exports.something;
+       "inputs": "x";
+       "outputs": "anything";
+       "assert": true;  // Always pass!
+   }
+   ```
+   **Soluzione:** Scrivi un'asserzione che **effettivamente** confronta i valori.
+
+2. **Test che verificano logica del framework, non del componente:**
+   ```dsl
+   // ❌ SBAGLIATO — state il verificando che import() funziona nel DSL
+   {
+       "action": imports.module_name;  // Non è una funzione!
+       "inputs": ();
+       "outputs": true;
+       "assert": @received != null;
+   }
+   ```
+   **Soluzione:** Testa una **funzione** del modulo importato, non il modulo stesso.
+
+3. **Note generiche o assenti:**
+   ```dsl
+   // ❌ SBAGLIATO
+   {
+       "action": exports.foo;
+       "inputs": "bar";
+       "outputs": "baz";
+       "assert": @received == @expected;
+       "note": "test";  // Troppo vago
+   }
+   ```
+   **Soluzione:** Descrivi **cosa** si sta testando e **perché** è importante:
+   ```dsl
+   "note": "foo() with input 'bar' returns 'baz' (nominal path)";
+   ```
+
+4. **Teste.test.dsl completamente vuoto:**
+   ```dsl
+   // ❌ SBAGLIATO
+   tuple:test_suite := ();  // Indefinitamente!
+   ```
+   **Soluzione:** Se il componente è appena stato creato, scrivi **almeno un test**, anche se banale:
+   ```dsl
+   {
+       "action": exports.my_function;
+       "inputs": "test_input";
+       "outputs": "test_output";
+       "assert": @received == @expected;
+       "note": "Verificare che my_function è disponibile e non crasha";
+   }
+   ```
+
+5. **Input non rappresentativi:**
+   ```dsl
+   // ❌ MEDIOCRE — Testa solo con stringhe, mai numeri, liste, dicts
+   {
+       "action": exports.process;
+       "inputs": "always_a_string";
+       ...
+   }
+   ```
+   **Soluzione:** Testa con dati che rappresentano il vero utilizzo e i margini:
+   ```dsl
+   { "inputs": "normal_case"; ... },
+   { "inputs": 123; ... },
+   { "inputs": (); ... },  // Edge case: input vuoto
+   { "inputs": {"complex": "dict"}; ... }
+   ```
+
+### Checklist — Test DSL Completo
+
+Prima di dichiarare un file `.test.dsl` finito, verifica:
+
+- ✅ **Sezione `imports`**: Carica tutti i moduli/risorse necessari con `import()` (moduli Python) o `resource()` (file).
+- ✅ **Sezione `exports`**: Espone tutte le funzioni da testare, con nomi leggibili.
+- ✅ **Almeno 2-3 test per funzione testata**: Nominal case + edge case + negation/error.
+- ✅ **Ogni test ha una `"note"` descrittiva**: Chi legge i log capisce cosa si sta testando.
+- ✅ **Asserzioni realistiche**: Confrontano `@received` con `@expected`, non sono triviali.
+- ✅ **Esecuzione**: Testa localmente con `python3 public/main.py --test <filtro>` e vedi PASSED.
+- ✅ **Niente leftover debug**: Niente `print()`, niente commenti commented-out, niente `raise Exception("debug")`.
+
+### Esecuzione e Workflow
+
+```bash
+# Esegui i test di un manager specifico
+python3 public/main.py --test managers/tester
+
+# Esegui tutti i test di un'area (tutti i manager)
+python3 public/main.py --test managers
+
+# Esegui tutti i test del framework
+python3 public/main.py --test
+
+# Se un test fallisce, l'output mostra:
+#   expected: <valore atteso>
+#   received: <valore ottenuto>
+# Usa questi due valori per debuggare il problema nel codice testato.
+```
+
+Quando il test passa, il `Contract.record_tested()` aggiorna l'hash nel file `.contract.json` accanto al file — questo permette il boot in modalità strict.
+
+---
+
 ## 🚀 Workflow per Agenti — riepilogo end-to-end
 
 1. **Stabilisci la modalità** (App Builder o Framework Maintenance) e rispetta il relativo scope.

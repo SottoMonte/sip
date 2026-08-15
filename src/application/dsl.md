@@ -86,6 +86,20 @@ The DSL natively provides several built-in utilities:
 - `format("Hello {0}", name)`: String formatting.
 - `get(dict, "key.sub")`, `put(dict, "key", "val")`: Deep dictionary traversals.
 - `foreach(iterable, function)`: Iterates over a list.
+- `resource(path)`: Carica un file dal file-system come **stringa** (testo puro). Utile per template, config, DSL, codice sorgente.
+- `import(module_path)`: Importa un **modulo Python** e lo rende disponibile nel contesto DSL. Esempio: `import("framework.manager.tester")` carica il modulo e puoi accedere alle sue funzioni.
+
+### Differenza tra `resource()` e `import()`
+
+```dsl
+// resource() → carica il file come STRINGA
+my_source := resource("src/framework/manager/tester.py");
+// my_source è il codice sorgente (testo)
+
+// import() → carica il MODULO PYTHON
+my_module := import("framework.manager.tester");
+// my_module è il modulo importato, puoi usare my_module.resolve_filter, etc.
+```
 
 ## 🌐 Context Variables (`@`)
 If you need to explicitly reference a specific runtime context variable instead of relying on standard resolution, you can prefix it with `@`.

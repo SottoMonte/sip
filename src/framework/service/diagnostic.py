@@ -135,7 +135,7 @@ def create_diagnostic_report(exc_info: tuple = None) -> Dict[str, Any]:
     
     report = {
         "timestamp": datetime.now().isoformat(),
-        "system_info": get_system_info(),
+        #"system_info": get_system_info(),
         "exception": {
             "type": exc_type.__name__,
             "message": str(exc_value),

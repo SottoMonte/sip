@@ -39,8 +39,6 @@ type:scheme := {
     };
 };
 
-aaaa:print(imports.module);
-
 function:success_function := (str:y){x:y;}(str:x);
 
 tuple:test_suite := (
