@@ -1,10 +1,9 @@
 imports: {
-    'module':resource("src/framework/manager/storekeeper." + extension);
+    'module': import("framework.manager.defender");
 };
 
 exports: {
-    'assert': imports.storekeeper.assertt;
-    'foreach': imports.storekeeper.foreach;
+    'url_details': imports.module.Manager._url_details;
 };
 
 type:scheme := {
@@ -42,6 +41,13 @@ type:scheme := {
 function:success_function := (str:y){x:y;}(str:x);
 
 tuple:test_suite := (
+    {
+        "action": exports.url_details;
+        "inputs": "https://example.test/users/42?tag=one&tag=two#section=profile";
+        "outputs": token_print;
+        "assert": @received.1.protocol == "https" & @received.1.path == ["users", "42"] & @received.1.query.tag == ["one", "two"] & @received.1.fragment.section == "profile";
+        "note": "URL details normalizza path, query multipla e fragment";
+    },
     /*{
         "action": exports.serial;
         "inputs":((pass,[1],{}),(pass,[2],{}));

@@ -461,6 +461,7 @@ class Loader:
         "presentation": "src/framework/port/presentation.py",
         "persistence": "src/framework/port/persistence.py",
         "network": "src/framework/port/network.py",
+        "authentication": "src/framework/port/authentication.py",
     }
 
     managers = {

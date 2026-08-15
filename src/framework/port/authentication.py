@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
-class port(ABC):
+import framework.service.flow as flow
+
+class Port(ABC):
 
     # Mappa: nome_metodo -> decoratore da applicare automaticamente
     _method_decorators = {

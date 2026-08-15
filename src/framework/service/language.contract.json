@@ -114,6 +114,9 @@
       "visit_call": {
         "production": "c51b95bbddcf50be0fe656a80d233aa4e756823f3b512d521c75c39392eed807"
       }
+    },
+    "python_call": {
+      "production": "a68777b79c81b3c0c1519fa3a97660717bdba8b031e4903c246451d6245723eb"
     }
   }
 }

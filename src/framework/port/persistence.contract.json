@@ -2,19 +2,24 @@
   "hashes": {
     "Port": {
       "create": {
-        "production": "46f3b2e59afcac67736f0efb850d6c4c784bf462cf944101d4fc616d325bb1fe"
+        "production": "46f3b2e59afcac67736f0efb850d6c4c784bf462cf944101d4fc616d325bb1fe",
+        "test": "46f3b2e59afcac67736f0efb850d6c4c784bf462cf944101d4fc616d325bb1fe"
       },
       "read": {
-        "production": "1f1b6c6294dbbb4b1f469dd0e440b1df802a202778948e16cac3676216ba287f"
+        "production": "1f1b6c6294dbbb4b1f469dd0e440b1df802a202778948e16cac3676216ba287f",
+        "test": "1f1b6c6294dbbb4b1f469dd0e440b1df802a202778948e16cac3676216ba287f"
       },
       "update": {
-        "production": "d535ecf638fe31d7a01e21e701bed41d0e96d9c9c78aa0984e1561f170945c0c"
+        "production": "d535ecf638fe31d7a01e21e701bed41d0e96d9c9c78aa0984e1561f170945c0c",
+        "test": "d535ecf638fe31d7a01e21e701bed41d0e96d9c9c78aa0984e1561f170945c0c"
       },
       "delete": {
-        "production": "3d058c1cf5643fce3eba74e9448587f2616e72e573f3234c086d8221324cd207"
+        "production": "3d058c1cf5643fce3eba74e9448587f2616e72e573f3234c086d8221324cd207",
+        "test": "3d058c1cf5643fce3eba74e9448587f2616e72e573f3234c086d8221324cd207"
       },
       "query": {
-        "production": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5"
+        "production": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5",
+        "test": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5"
       },
       "view": {
         "production": "e3b9cc5fa356723cdd240147771d0bb2a0d1c46e17e7a3059f86dcd882a45134"

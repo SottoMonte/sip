@@ -7,19 +7,37 @@ import framework.service.language as language
 import framework.service.scheme as scheme
 import framework.service.flow as flow
 import framework.manager.loader as loader
+import framework.port.authentication as authentication
 
 class Manager:
-    def __init__(self, loader: loader.Loader, **constants):
+    def __init__(self, loader: loader.Loader, authentications: list[authentication.Port], **constants):
         """
-        Inizializza la classe Defender con i provider specificati.
+        Inizializza il manager con i servizi necessari alla gestione delle richieste.
 
-        :param constants: Configurazioni iniziali, deve includere 'providers'.
+        :param loader: Carica risorse, manager e file DSL dell'applicazione.
+        :param authentications: Provider usati per autenticare, registrare e
+            disconnettere gli utenti.
+        :param constants: Configurazioni del manager, incluse le policy da
+            caricare durante l'avvio.
         """
+
+        # Interpreta i file DSL e gestisce le sessioni dell'interprete.
         self.interpreter = language.Interpreter(scheme.schemes)
+
+        # Loader condiviso dal framework per leggere risorse e manager.
         self.loader = loader
+
+        # Configurazione ricevuta dal container, conservata per il bootstrap.
         self.config = constants
-        #self.authentications = constants.get('authentications', [])
-        #self.models = constants.get('models')
+
+        # Provider di autenticazione utilizzati dai metodi del ciclo di vita
+        # dell'utente: authenticate, activate, reinstate e terminate.
+        self.authentications = authentications
+
+        # Nomi dei controller DSL caricati durante startup().
+        self.controllers = []
+
+        # Policy caricate e valutate dall'interprete, indicizzate per nome.
         self.policies = {}
 
     async def shutdown(self, session):
@@ -45,17 +63,15 @@ class Manager:
             print(f"[+] Policy: {policy}/{filename}")
 
         from pathlib import Path
-        self.controllers = []
-        cartella = Path("src/application/controller")
-        for file in cartella.glob("*.dsl"):
+
+        controllers_path = Path("src/application/controller")
+        for file in controllers_path.glob("*.dsl"):
             code = await self.loader.resource(file)
-            self.controllers.append(file.name[:-4])
-            await self.add_file(file.name[:-4],code)
+            controller_name = file.stem
+            self.controllers.append(controller_name)
+            await self.interpreter.load_file(controller_name, code)
         
         print("[+] Controllers: ",self.controllers)
-
-    async def add_file(self, name, source):
-        return await self.interpreter.load_file(name, source)
 
     @flow.result(inputs='session')
     async def session_create(self, env={},**session):
@@ -197,7 +213,7 @@ class Manager:
                 all_resutl.append(False)
         return any(all_resutl) if len(all_resutl) > 0 else False
 
-    def resolve(self, risorse, request_url, request_method, base_url=None,**kargs):
+    def resolve_route(self, risorse, request_url, request_method, base_url=None,**kargs):
         
         try:
             # 1. Normalizzazione URL
