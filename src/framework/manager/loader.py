@@ -724,6 +724,44 @@ class Loader:
                     result[res.name.split(".")[-1]] = obj
         return result
 
+    async def _discover_components(self, config_toml_path: Any) -> tuple[dict, list[Resource]]:
+        """Carica core, manager e adapter senza istanziarli."""
+        kwargs = (
+            config_toml_path
+            if isinstance(config_toml_path, dict)
+            else {"config": str(config_toml_path)}
+        )
+        config_file = kwargs.get("config", "pyproject.toml")
+        schemes = await self.load_schemes(
+            ["src/framework/scheme", "src/application/model"]
+        )
+        await self.framework.load_core(
+            self.services,
+            self.ports,
+            extra_by_name={
+                "scheme": {
+                    "schemes": schemes,
+                    "jinja_env": self.infra.jinja_env,
+                }
+            },
+        )
+        config = tomllib.loads(Path(config_file).read_text(encoding="utf-8"))
+        self.current_config = config
+
+        mgr_resources = []
+        for name, path in self.managers.items():
+            resource = Resource(
+                name=f"framework.manager.{name}",
+                path=path,
+                kind="MANAGER",
+                config=config.get("manager", {}).get(name, {}),
+            )
+            await self.framework.load(resource)
+            mgr_resources.append(resource)
+
+        await self._discover_adapters(config)
+        return config, mgr_resources
+
     async def bootstrap(self, config_toml_path: Any) -> Application:
         """Inizializza il framework caricando configurazione e risorse."""
         kwargs = (
@@ -739,23 +777,9 @@ class Loader:
             or kwargs.get("skip_verify")
         )
 
-        schemes = await self.load_schemes(
-            ["src/framework/scheme", "src/application/model"]
-        )
-        
-        # 1. Caricamento dinamico dei moduli di core (incluso container.py)
-        await self.framework.load_core(
-            self.services,
-            self.ports,
-            extra_by_name={
-                "scheme": {
-                    "schemes": schemes,
-                    "jinja_env": self.infra.jinja_env,
-                }
-            },
-        )
+        config, mgr_resources = await self._discover_components(config_toml_path)
 
-        # 2. Risoluzione dinamica di Container dopo che load_core() lo ha registrato
+        # Risoluzione dinamica di Container dopo il caricamento del core.
         container_mod = sys.modules.get("framework.service.container")
         if not container_mod or not hasattr(container_mod, "Container"):
             raise RuntimeError(
@@ -768,26 +792,7 @@ class Loader:
         # 3. Registrazione del container nel container stesso (per DI)
         self.container.put(container_cls, self.container, singleton=True)
 
-        try:
-            config = tomllib.loads(Path(config_file).read_text(encoding="utf-8"))
-        except Exception as exc:
-            raise RuntimeError(f"Impossibile caricare '{config_file}': {exc}") from exc
-
-        self.current_config = config
         print("\n[*] Discovery...")
-
-        mgr_resources = []
-        for name, path in self.managers.items():
-            res = Resource(
-                name=f"framework.manager.{name}",
-                path=path,
-                kind="MANAGER",
-                config=config.get("manager", {}).get(name, {}),
-            )
-            await self.framework.load(res)
-            mgr_resources.append(res)
-
-        await self._discover_adapters(config)
 
         print("\n[*] Build...")
         managers = self._build_managers(mgr_resources)
@@ -809,7 +814,7 @@ class Loader:
         self.app = app
         return app
 
-    async def run_tests(self, filter_value: str | None = None) -> None:
+    async def run_tests(self, filter_value: str | None = None) -> bool:
         """Esegue la suite di test DSL tramite il Manager del Tester.
         
         :param filter_value: Filtro opzionale per limitare i test eseguiti
@@ -818,10 +823,28 @@ class Loader:
         tester = managers.get("tester")
         if tester is None:
             print("[!] Manager 'tester' non trovato nel container")
-            return
+            return False
         
         # Passa il filtro come constant al metodo run()
-        await tester.run(filter=filter_value)
+        return await tester.run(filter=filter_value)
+
+    async def verify_contracts(self, config_toml_path: Any) -> bool:
+        """Verifica i contract senza costruire o avviare l'applicazione."""
+        self.kwargs = (
+            config_toml_path
+            if isinstance(config_toml_path, dict)
+            else {"config": str(config_toml_path)}
+        )
+        self.framework.strict = True
+
+        try:
+            await self._discover_components(config_toml_path)
+        except Exception as exc:
+            print(f"[!] Verifica contract fallita: {exc}")
+            return False
+
+        print("[✓] Tutti i contract sono verificati in modalità strict.")
+        return True
 
     async def import_module(self, module_path: str):
         """Importa un modulo Python dinamicamente tramite l'infrastruttura."""

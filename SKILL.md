@@ -44,7 +44,7 @@ Il framework ha già il meccanismo per impedire che codice non verificato arrivi
    python3 public/main.py --test managers/<nome_manager>
    ```
    (filtri disponibili: `managers`, `ports`, `services`, `infrastructure`, oppure un path diretto)
-4. Se il test passa, `Contract.record_tested` aggiorna l'hash nel contract JSON accanto al file — è quello che permette il boot in modalità strict.
+4. Se tutti gli export dichiarati sono testati con successo, `Contract.record_tested` rigenera il contract JSON accanto al file. Il contract contiene API dichiarata, hash di test/produzione, versione, timestamp e commit Git — questi dati permettono il boot in modalità strict.
 5. **Non usare mai `--skip-verify` come soluzione a un test che fallisce.** È un flag di emergenza per l'umano, non un modo per far "sparire" un errore che hai introdotto. Se un test fallisce dopo una tua modifica, il problema è nella modifica, non nel test.
 6. **Un manager modificato = un commit = un contract aggiornato.** Non accumulare modifiche a più componenti in un solo commit: rende impossibile capire quale hash corrisponde a quale comportamento verificato.
 
@@ -170,8 +170,77 @@ Assicurati sempre che il virtual environment sia attivo prima di eseguire comand
 | `python3 public/main.py --setup` | `pip install -e .` + installazione dipendenze degli adapter attivi — al primo avvio |
 | `python3 public/main.py --install` | Installa solo le dipendenze degli adapter attivi (senza editable install) |
 | `python3 public/main.py --test [FILTRO]` | Esegue i test, opzionalmente filtrati (`managers`, `ports`, `services`, `infrastructure/message`, ecc.) |
+| `python3 public/main.py --verify` | Verifica tutti i contract in modalità strict senza costruire né avviare l'applicazione |
 | `python3 public/main.py --dev` | Modalità dev: disattiva il controllo strict dei contract |
 | `python3 public/main.py --skip-verify` | Bypassa il controllo "codice testato" — solo per emergenze umane, mai come default in un workflow LLM |
+
+### Comportamento dei comandi CLI
+
+I flag principali selezionano percorsi distinti nel launcher:
+
+- **Avvio normale** — `python3 public/main.py`: legge `pyproject.toml`, carica core, manager e adapter, costruisce il container e avvia `Application`. In modalità normale il controllo strict dei contract è attivo.
+- **Setup iniziale** — `python3 public/main.py --setup`: installa il progetto in editable mode con `pip install -e .`, poi analizza e installa le dipendenze dichiarate nei contract degli adapter attivi. Non avvia l'applicazione.
+- **Installazione adapter** — `python3 public/main.py --install`: salta l'editable install e installa solo le dipendenze dichiarate dagli adapter attivi. Non esegue il bootstrap completo e non avvia l'applicazione.
+- **Test DSL** — `python3 public/main.py --test [FILTRO]`: esegue il bootstrap necessario al tester con strict disattivato, esegue i file `.test.dsl` selezionati e può rigenerare i contract certificati. Restituisce exit code `0` se la suite passa e `1` se un test o un file non viene eseguito.
+- **Verifica contract** — `python3 public/main.py --verify`: carica i componenti in strict senza costruire container, adapter o `Application`. Restituisce `0` solo se tutti gli export dichiarati sono presenti e gli hash corrispondono; restituisce `1` in caso di contract stale, export mancanti o errore di discovery.
+- **Modalità sviluppo** — `python3 public/main.py --dev`: esegue il normale bootstrap con verifica strict disattivata. Non deve essere usata come sostituto dei test o della verifica dei contract.
+- **Bypass emergenziale** — `python3 public/main.py --skip-verify`: esegue il normale bootstrap ignorando il controllo strict dei contract. È riservato a interventi manuali temporanei e non deve essere usato per risolvere test falliti.
+
+`--setup`, `--install`, `--test` e `--verify` sono modalità operative alternative all'avvio normale. Per la CI usare almeno `--test` e il controllo del working tree sui contract; usare anche `--verify` quando si vuole controllare esplicitamente il boot strict senza avviare servizi.
+
+### Contract e API dichiarata
+
+Il blocco `exports` del test DSL è il manifest dell'API pubblica certificata del componente. Può esportare una funzione, una classe o un'istanza; quando esporta un oggetto, i metodi usati dalla suite diventano i componenti certificati di quell'export.
+
+```dsl
+exports: {
+        'messenger': messenger
+};
+```
+
+La suite deve invocare i metodi tramite l'oggetto esportato:
+
+```dsl
+"action": exports.messenger.send;
+```
+
+Regole obbligatorie:
+
+- ogni export deve essere risolvibile e non può essere `none`;
+- ogni azione della suite deve appartenere a un export dichiarato;
+- ogni metodo esportato deve essere esercitato almeno una volta da un test passato;
+- un metodo privato può essere certificato solo se è raggiunto tramite un export esplicito;
+- il contract viene aggiornato solo quando l'intera API dichiarata è certificata;
+- i metodi non presenti nell'API dichiarata restano dettagli interni e non vengono verificati dal contract.
+
+Il contract generato ha questa forma:
+
+```json
+{
+    "contract_version": 2,
+    "tested_at": "2026-08-16T12:16:04+00:00",
+    "git_commit": "f7c5099",
+    "exports": {
+        "messenger": [
+            "Manager._split_domain",
+            "Manager.receive",
+            "Manager.send"
+        ]
+    },
+    "hashes": {
+        "Manager": {
+            "send": {
+                "test": "<sha256>",
+                "production": "<sha256>"
+            }
+        }
+    }
+}
+```
+
+La scrittura del contract è atomica e la certificazione ricostruisce gli hash, quindi gli export rimossi non lasciano componenti obsoleti. I contract legacy privi di `exports` restano leggibili e vengono verificati con la reflection pubblica storica.
+
+In modalità `--dev` il framework segnala separatamente export mancanti, non testati o modificati e consente l'avvio. In modalità strict il boot viene bloccato se un export dichiarato manca, non ha un hash di test o è cambiato dopo la certificazione.
 
 ---
 
@@ -190,10 +259,9 @@ imports: {
     'helper_data': resource("src/path/to/file.json")
 };
 
-// Sezione 2: EXPORTS — Espone le funzioni da testare
+// Sezione 2: EXPORTS — Dichiara l'API pubblica da certificare
 exports: {
-    'my_function': imports.module_name.my_function,
-    'my_other_function': imports.module_name.my_other_function
+    'component': imports.module_name.Component
 };
 
 // Sezione 3: TEST SUITE — Definisce i test veri
@@ -208,7 +276,7 @@ tuple:test_suite := (
 
 ```dsl
 {
-    "action":   exports.my_function,           // La funzione da testare
+    "action":   exports.component.method,      // Metodo dell'API da testare
     "inputs":   "arg" or ("arg1", "arg2") or {"key": "value"},  // Input(i)
     "outputs":  "expected_result",             // Output atteso
     "assert":   @received == @expected,        // Condizione di successo
@@ -218,7 +286,7 @@ tuple:test_suite := (
 
 **Dettagli:**
 
-- **`"action"`**: Puntatore alla funzione importata tramite `exports`. **Obbligatorio.**
+- **`"action"`**: Puntatore a una funzione o a un metodo raggiunto tramite `exports`. **Obbligatorio.**
 - **`"inputs"`**: Può essere:
   - Una tupla (se la funzione richiede più argomenti): `("arg1", "arg2", arg3)`
   - Un singolo valore (se la funzione richiede un solo argomento): `"string_arg"` o `123`
@@ -368,7 +436,8 @@ tuple:test_suite := (
 Prima di dichiarare un file `.test.dsl` finito, verifica:
 
 - ✅ **Sezione `imports`**: Carica tutti i moduli/risorse necessari con `import()` (moduli Python) o `resource()` (file).
-- ✅ **Sezione `exports`**: Espone tutte le funzioni da testare, con nomi leggibili.
+- ✅ **Sezione `exports`**: Dichiara tutta l'API pubblica da certificare; può contenere funzioni, classi o istanze.
+- ✅ **Metodi esportati**: Ogni metodo raggiunto da un export oggetto è usato da almeno un test passato.
 - ✅ **Almeno 2-3 test per funzione testata**: Nominal case + edge case + negation/error.
 - ✅ **Ogni test ha una `"note"` descrittiva**: Chi legge i log capisce cosa si sta testando.
 - ✅ **Asserzioni realistiche**: Confrontano `@received` con `@expected`, non sono triviali.
@@ -393,7 +462,25 @@ python3 public/main.py --test
 # Usa questi due valori per debuggare il problema nel codice testato.
 ```
 
-Quando il test passa, il `Contract.record_tested()` aggiorna l'hash nel file `.contract.json` accanto al file — questo permette il boot in modalità strict.
+Quando l'intera suite passa, `Contract.record_tested()` rigenera il file `.contract.json` accanto al componente. Il boot strict verifica esclusivamente gli export dichiarati nel contract e confronta gli hash `test` e `production`.
+
+### Verifica strict senza avvio dell'applicazione
+
+Il comando:
+
+```bash
+python3 public/main.py --verify
+```
+
+carica schemi, servizi core, manager e adapter configurati in modalità strict e verifica i contract tramite `Contract.verify_module`. Non costruisce il container, non istanzia gli adapter, non crea `Application` e non avvia servizi di rete.
+
+Il comando restituisce:
+
+- exit code `0` se tutti i contract sono coerenti e gli export dichiarati risultano testati;
+- exit code `1` se un contract contiene export mancanti, hash non aggiornati o componenti non certificati;
+- exit code `1` anche in caso di errore durante la discovery o il caricamento dei moduli.
+
+`--verify` non sostituisce `--test`: il primo controlla la coerenza tra codice e contract, mentre il secondo esegue le suite DSL e può rigenerare i contract. In CI è consigliato eseguire prima `--test`, verificare che il working tree non contenga contract modificati e poi usare `--verify` come controllo strict finale.
 
 ---
 

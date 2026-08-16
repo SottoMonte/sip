@@ -190,6 +190,7 @@ class Manager:
             test_passati=summary["test_passati"],
             test_falliti=summary["test_falliti"],
         )
+        return esito == "PASSED"
 
     # ── esecuzione di un singolo file .test.dsl ────────────────────────────────
 

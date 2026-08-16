@@ -40,16 +40,19 @@ async def main(config):
         await loader_instance.install(config)
         return
 
+    if config.get('verify'):
+        return await loader_instance.verify_contracts(config)
+
     app = await loader_instance.bootstrap(config)
 
     try:
         if config.get('test') is not None:
-            await loader_instance.run_tests(config.get('test'))
-            return
+            return await loader_instance.run_tests(config.get('test'))
 
         await app.startup()
     except Exception as e:
         print(f"[!] Errore critico: {e}")
+        return False
     finally:
         await app.shutdown()
 
@@ -67,6 +70,11 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action="store_true", help="Abilita la modalità debug")
     parser.add_argument("--dev", action="store_true", help="Abilita la modalità dev")
     parser.add_argument("--install", action="store_true", help="Installa le dipendenze del framework")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Verifica i contract in modalità strict senza avviare l'applicazione"
+    )
     parser.add_argument(
         "--test",
         nargs="?",         # opzionale: accetta un valore oppure None se assente
@@ -89,4 +97,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args_dict = vars(args)
 
-    asyncio.run(main(args_dict))
+    result = asyncio.run(main(args_dict))
+    if result is False:
+        sys.exit(1)
