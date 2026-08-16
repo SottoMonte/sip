@@ -383,7 +383,7 @@ class Application:
                     await asyncio.sleep(0.2)
                     continue
 
-                message = await messenger.read(self._session, domain="event")
+                message = await messenger.receive(self._session, domain="event")
                 for name, mgr in list(self._loader.get_managers().items()):
                     if hasattr(mgr, "reload"):
                         try:
@@ -666,12 +666,28 @@ class Loader:
         if not resource or not resource.module:
             return
 
-        available = reflection.module_components(resource.module)
+        data = outcome.get("data", {})
+        manifest = data.get("exports")
+        declared_exports = None
+        if isinstance(manifest, dict):
+            declared_exports = []
+            for methods in manifest.values():
+                if isinstance(methods, list):
+                    declared_exports.extend(methods)
+                elif isinstance(methods, str):
+                    declared_exports.append(methods)
+        available = reflection.module_components(
+            resource.module,
+            set(declared_exports) if declared_exports is not None else None,
+        )
         if not available:
             return
 
+        if declared_exports is not None and not outcome.get("success"):
+            return
+
         passed, failed = set(), set()
-        for detail in outcome.get("data", {}).get("details", []):
+        for detail in data.get("details", []):
             target = detail.get("target")
             if not target:
                 continue
@@ -681,11 +697,13 @@ class Loader:
                 (passed if detail.get("status") == "OK" else failed).add(name)
 
         tested = passed - failed
+        if declared_exports is not None and tested != set(declared_exports):
+            return
         if not tested:
             return
 
         hashes = {n: reflection.hash_text(available[n]) for n in tested}
-        contract.record_tested(source_path, hashes)
+        contract.record_tested(source_path, hashes, exports=declared_exports)
         print(f"[🔏] Contratto aggiornato: {source_path} → {', '.join(sorted(hashes))}")
 
     def get_managers(self) -> dict:

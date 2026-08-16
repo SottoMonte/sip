@@ -394,7 +394,7 @@ class AppDinamica(App):
 
         if w is not None:
             attrs_tag = self.adapter.presenter.estrai_attributi_tag(w)
-            await self.adapter.messenger.post(self.adapter.session, domain=attrs_tag['click'], message=str(event.button.id))
+            await self.adapter.messenger.send(self.adapter.session, domain=attrs_tag['click'], message=str(event.button.id))
         
         """if click == "modal:close":
             self.adapter.close_modal()
@@ -408,7 +408,7 @@ class AppDinamica(App):
         a = self._dsl_attrs(event.input.id)
         raise Exception(f"[on_input_submitted] Nessun attributo 'submit' per Input {event.input.id} (DSL: {a})")
         if a and 'submit' in a:
-            await self.adapter.messenger.post(self.adapter.session, domain=a['submit'], message=str(event.value))
+            await self.adapter.messenger.send(self.adapter.session, domain=a['submit'], message=str(event.value))
         raise Exception(f"[on_input_submitted] Nessun attributo 'submit' per Input {event.input.id} (DSL: {a})")
     
     async def on_input_changed(self, event: Input.Changed) -> None:
@@ -422,7 +422,7 @@ class AppDinamica(App):
 
         if w is not None:
             attrs_tag = self.adapter.presenter.estrai_attributi_tag(w)
-            await self.adapter.messenger.post(self.adapter.session, domain=attrs_tag['change'], message=str(event.value))
+            await self.adapter.messenger.send(self.adapter.session, domain=attrs_tag['change'], message=str(event.value))
         
         #a = self._dsl_attrs(event.select.id)
         #raise Exception(f"[on_select_changed] Nessun attributo 'change' per Select {event.select.id} (DSL: {a})")

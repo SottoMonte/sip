@@ -6,7 +6,8 @@ imports: {
 };
 
 exports: {
-    'resolve_filter': imports.tester_module.resolve_filter
+    'resolve_filter': imports.tester_module.resolve_filter;
+    'resolve_target_name': imports.tester_module.resolve_target_name
 };
 
 // Test semplice: verify import() funziona
@@ -24,6 +25,13 @@ tuple:test_suite := (
         "outputs": "src/framework/port";
         "assert": @received == @expected;
         "note": "Test import() - resolve_filter con 'ports'";
+    },
+    {
+        "action": exports.resolve_target_name;
+        "inputs": exports.resolve_filter;
+        "outputs": "resolve_filter";
+        "assert": @received == @expected;
+        "note": "resolve_target_name restituisce il nome stabile della funzione esportata";
     }
 );
 

@@ -24,7 +24,7 @@ counter_logic : {
 ### Defining Actions (Triggers)
 Use the format `trigger_name(kwargs) -> action;`
 ```dsl
-increment_btn(deps: false) -> messenger.post(
+increment_btn(deps: false) -> messenger.send(
     session: sid,
     domain: "counter:counter_logic.count",
     payload: (counter_logic.count + 1)
@@ -45,7 +45,7 @@ The pipe operator `|>` allows for clean functional transformations of data. The 
 process_user() -> 
     database.get_user(id) 
     |> transform_user_data(strict: true) 
-    |> messenger.post(session: sid, event: "user_loaded");
+    |> messenger.send(session: sid, event: "user_loaded");
 ```
 
 ## 🏗️ Data Structures

@@ -31,12 +31,18 @@ class Reflection:
         return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
     @staticmethod
-    def class_methods(cls) -> dict[str, str]:
-        """Sorgente dei metodi pubblici definiti direttamente su `cls`
-        (esclude ereditati, dunder e privati). {nome_metodo: sorgente}."""
+    def class_methods(cls, names: set[str] | None = None) -> dict[str, str]:
+        """Sorgente dei metodi definiti direttamente su `cls`.
+
+        Senza `names` conserva il comportamento storico e considera solo i
+        metodi pubblici. Con una selezione esplicita permette a un contract di
+        certificare anche un metodo privato dichiarato intenzionalmente.
+        """
         methods = {}
         for name, member in vars(cls).items():
-            if name.startswith('_'):
+            if names is None and name.startswith('_'):
+                continue
+            if names is not None and name not in names:
                 continue
             fn = member.__func__ if isinstance(member, (staticmethod, classmethod)) else member
             if not inspect.isfunction(fn):
@@ -48,7 +54,7 @@ class Reflection:
         return methods
 
     @staticmethod
-    def module_components(module) -> dict[str, str]:
+    def module_components(module, names: set[str] | None = None) -> dict[str, str]:
         """Sorgente di tutti i componenti pubblici definiti DIRETTAMENTE in
         `module` (esclude import): funzioni a livello di modulo e metodi
         delle classi definite nel modulo.
@@ -62,8 +68,13 @@ class Reflection:
             'NomeClasse.nome_metodo'   per metodi di classi nel modulo
         """
         components: dict[str, str] = {}
+        selected = set(names) if names is not None else None
         for name, member in vars(module).items():
-            if name.startswith('_'):
+            if selected is None and name.startswith('_'):
+                continue
+            if selected is not None and name not in selected and not any(
+                item.startswith(f"{name}.") for item in selected
+            ):
                 continue
             if inspect.isfunction(member) and getattr(member, "__module__", None) == module.__name__:
                 try:
@@ -71,7 +82,14 @@ class Reflection:
                 except (OSError, TypeError):
                     continue
             elif inspect.isclass(member) and member.__module__ == module.__name__:
-                for method_name, source in Reflection.class_methods(member).items():
+                class_names = None
+                if selected is not None:
+                    class_names = {
+                        item.split(".", 1)[1]
+                        for item in selected
+                        if item.startswith(f"{name}.")
+                    }
+                for method_name, source in Reflection.class_methods(member, class_names).items():
                     components[f"{name}.{method_name}"] = source
         return components
 

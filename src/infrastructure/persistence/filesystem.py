@@ -75,7 +75,7 @@ class Adapter(persistence.Port):
         self.observer.start()
 
     async def handle_watcher_event(self, session, event_type, filepath):
-        await self.messenger.post(
+        await self.messenger.send(
             session,
             message=filepath,      
             domain=f"event.{event_type}"

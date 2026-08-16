@@ -22,14 +22,14 @@ class Manager:
     async def startup(self, session):
         '''for repository in self.repositories:
             self.maked[repository] = Repository(**self.repositories[repository])'''
-        await self.messenger.post(session, message="Storekeeper avviato.", domain="console:info")
+        await self.messenger.send(session, message="Storekeeper avviato.", domain="console:info")
         for provider in self.persistences:
             if hasattr(provider, 'start'):
                 await provider.start(session)
         
 
     async def shutdown(self, session):
-        await self.messenger.post(session, message="Storekeeper arrestato.", domain="console:info")
+        await self.messenger.send(session, message="Storekeeper arrestato.", domain="console:info")
 
     #@flow.result(inputs=("session",))
     async def preparation(self, session, storekeeper):

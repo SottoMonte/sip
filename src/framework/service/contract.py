@@ -9,8 +9,11 @@ class Contract:
     Un contratto ha due responsabilità:
     1. dichiarare le dipendenze pip del componente (`requires`), quando
        presenti (tipicamente solo negli adapter, usato da Loader.install());
-    2. certificare, componente per componente, che il codice in esecuzione
-       è quello che ha superato i test — struttura:
+    2. dichiarare gli export che compongono l'API verificata e certificare,
+       componente per componente, che il codice in esecuzione è quello che ha
+       superato i test — struttura:
+
+        "exports": ["Manager.send", "Manager.receive"],
 
         "hashes": {
           "Port": {
@@ -24,8 +27,8 @@ class Contract:
        ('Port' → 'initialize'); le funzioni a livello di modulo, non
        avendo una classe sotto cui stare, restano piatte alla radice
        (vedi Reflection.module_components).
-       Se un componente cambia dopo essere stato testato, il suo hash
-       `production` non combacia più con `test` → al boot risulta stale.
+    Se un componente esportato cambia dopo essere stato testato, il suo
+    hash `production` non combacia più con `test` → al boot risulta stale.
 
     Un file senza contratto accanto non viene mai verificato: il contratto
     è opt-in, si applica a QUALSIASI file — non solo agli adapter.
@@ -66,14 +69,21 @@ class Contract:
         return hashes.setdefault(name, {})
 
     @staticmethod
-    def record_tested(source_path: str, component_hashes: dict[str, str]) -> None:
+    def record_tested(
+        source_path: str,
+        component_hashes: dict[str, str],
+        exports: list[str] | None = None,
+    ) -> None:
         """Chiamato dal tester quando i test relativi a specifici componenti
         (metodi o funzioni) passano. `component_hashes`: {nome: hash_sorgente}.
-        Non richiede che esista già un contratto: se manca lo crea."""
+        `exports`, quando presente, è il manifest dell'API verificata. Non
+        richiede che esista già un contratto: se manca lo crea."""
         if not component_hashes:
             return
         path = Contract.for_source(source_path)
         contract = Contract.read(path)
+        if exports is not None:
+            contract["exports"] = sorted(set(exports))
         hashes = contract.setdefault("hashes", {})
         for name, component_hash in component_hashes.items():
             Contract._entry(hashes, name)["test"] = component_hash
@@ -93,15 +103,29 @@ class Contract:
         if not os.path.exists(contract_path):
             return True
 
-        components = introspection.Reflection.module_components(module)
-        if not components:
+        contract = Contract.read(contract_path)
+        declared_exports = contract.get("exports")
+        if declared_exports is not None and not isinstance(declared_exports, list):
+            raise RuntimeError(
+                f"Contract non valido: 'exports' deve essere una lista in '{contract_path}'"
+            )
+
+        components = introspection.Reflection.module_components(
+            module,
+            set(declared_exports) if declared_exports is not None else None,
+        )
+        if not components and declared_exports is None:
             return True
 
-        contract = Contract.read(contract_path)
         hashes = contract.setdefault("hashes", {})
 
         stale = []
-        for name, source in components.items():
+        names = declared_exports if declared_exports is not None else components.keys()
+        for name in names:
+            source = components.get(name)
+            if source is None:
+                stale.append(name)
+                continue
             current = introspection.Reflection.hash_text(source)
             entry = Contract._entry(hashes, name)
             tested = entry.get("test")

@@ -1,0 +1,43 @@
+{
+  "hashes": {
+    "Manager": {
+      "resolve_route": {
+        "test": "f651cff45782dbe9adfe7ce9567ce600207c2821c48ffa8a738034f74be16d8b",
+        "production": "f651cff45782dbe9adfe7ce9567ce600207c2821c48ffa8a738034f74be16d8b"
+      },
+      "shutdown": {
+        "production": "995c632254b80637ac4fb225eec7d80293408b3e1f26374c83a97cb8ff52e801"
+      },
+      "startup": {
+        "production": "e4481e5b49dfc835770a70c1e51412d8f2a1f130eee8c0390aa6d2bc6c5eeab5"
+      },
+      "session_create": {
+        "production": "9a9b2cf0b30e5eff9f0fb0a0431dc0556045b9f4f6c70d7b5ba861f312b59ef7"
+      },
+      "session_get": {
+        "production": "801a93efde5e9f99c6d547da7cdbc57629ef52f57ce58fb87e978c8902548e4b"
+      },
+      "get_policy": {
+        "production": "99f94e951a6be32cc9bc6fd82e812ddd942f6f2dada624154edf76cd6935808f"
+      },
+      "new_session": {
+        "production": "241d5d37d5f96d30f76134ad2a61dffcbbb0257c0adddfb660e5e96bcc7687ab"
+      },
+      "terminate": {
+        "production": "644a0631dc668001c433078c67437d21388aacae0ed0f9f3854db2d6a0899717"
+      },
+      "reinstate": {
+        "production": "f4dc33aa9deaeb8b8b374caff325e04177413f5dca320e761012b0f0ed50f181"
+      },
+      "authenticate": {
+        "production": "796ad36e3861f1c05200d7032415249939a5e62bca464135d79b21001d037745"
+      },
+      "activate": {
+        "production": "784c46dac233779d7806246af691e0317326f6b4887cf2afca6b4f7adcb17f9f"
+      },
+      "authorized": {
+        "production": "41e41005820c94311849d995829810f42f6815af6acd370f9c2397e68782eee7"
+      }
+    }
+  }
+}

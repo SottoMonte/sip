@@ -42,6 +42,36 @@ def resolve_filter(raw: str | None) -> Optional[str]:
     return raw
 
 
+def resolve_target_name(target) -> str:
+    """Ritorna il nome stabile usato per associare un callable al contract."""
+    return getattr(target, "__qualname__", None) or str(target)
+
+
+def resolve_export_alias(
+    target,
+    callable_exports: dict[int, str],
+    object_exports: dict[int, tuple[str, object]],
+) -> str | None:
+    """Associa un callable all'export che lo contiene o lo espone."""
+    alias = callable_exports.get(id(target))
+    if alias:
+        return alias
+
+    owner = getattr(target, "__self__", None)
+    if owner is not None:
+        alias = object_exports.get(id(owner))
+        if alias:
+            return alias
+
+    target_name = resolve_target_name(target)
+    for object_alias, exported_object in object_exports.values():
+        class_name = type(exported_object).__name__
+        if target_name.startswith(f"{class_name}."):
+            return object_alias
+
+    return None
+
+
 class Manager:
     def __init__(self, loader: loader_module.Loader, **constants):
         """Inizializza il Manager per l'esecuzione dei test DSL.
@@ -201,7 +231,44 @@ class Manager:
         if isinstance(test_suite, dict):
             test_suite = [test_suite]
 
-        results = {"total": 0, "passed": 0, "failed": 0, "errors": [], "details": []}
+        exports = ctx.get('exports', {}) or {}
+        exported_targets = {
+            id(target): alias
+            for alias, target in exports.items()
+            if callable(target)
+        } if isinstance(exports, dict) else {}
+        exported_objects = {
+            id(target): (alias, target)
+            for alias, target in exports.items()
+            if not callable(target) and target is not None
+        } if isinstance(exports, dict) else {}
+        export_methods = {
+            alias: set()
+            for alias in exports
+        } if isinstance(exports, dict) else {}
+        invalid_exports = [
+            alias for alias, target in exports.items()
+            if target is None
+        ] if isinstance(exports, dict) else ["exports"]
+
+        results = {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": [],
+            "details": [],
+            "exports": {},
+            "export_errors": [],
+        }
+        if invalid_exports:
+            results["export_errors"].append(
+                f"Export non valido: {', '.join(sorted(invalid_exports))}"
+            )
+        used_exports = set()
+
+        for alias, target in exports.items() if isinstance(exports, dict) else ():
+            if callable(target):
+                export_methods[alias].add(resolve_target_name(target))
 
         for i, test in enumerate(test_suite):
             if not isinstance(test, dict):
@@ -223,6 +290,14 @@ class Manager:
                 )
                 continue
 
+            export_alias = resolve_export_alias(target, exported_targets, exported_objects)
+            if exports and export_alias is None:
+                self._record_setup_error(
+                    results, s, i, test_note, target,
+                    f"'action' non dichiarata in exports (valore risolto: {target!r})."
+                )
+                continue
+
             if not callable(assert_fn):
                 self._record_setup_error(
                     results, s, i, test_note, target,
@@ -232,7 +307,15 @@ class Manager:
 
             # ── fase 1: invocazione dell'azione ─────────────────────────
             try:
-                if isinstance(args, dict):
+                if isinstance(args, dict) and ('args' in args or 'kwargs' in args):
+                    positional = args.get('args', ())
+                    keyword = args.get('kwargs', {})
+                    if not isinstance(positional, (list, tuple)):
+                        positional = (positional,)
+                    if not isinstance(keyword, dict):
+                        raise TypeError("'inputs.kwargs' deve essere un dizionario")
+                    received = await interp.call(target, tuple(positional), keyword)
+                elif isinstance(args, dict):
                     received = await interp.call(target, (), args)
                 elif isinstance(args, (list, tuple)):
                     received = await interp.call(target, args)
@@ -255,10 +338,19 @@ class Manager:
                 s.error(f"Test N.{i} ({test_note}): errore nella valutazione dell'assert", exception=e, expected=expected, received=received)
                 continue
 
+            target_name = resolve_target_name(target)
             results["passed" if ok else "failed"] += 1
-            detail = {"target": str(target), "status": "OK" if ok else "FAIL", "note": test_note}
+            detail = {
+                "target": target_name,
+                "export": export_alias,
+                "status": "OK" if ok else "FAIL",
+                "note": test_note,
+            }
 
             if ok:
+                if export_alias:
+                    used_exports.add(export_alias)
+                    export_methods.setdefault(export_alias, set()).add(target_name)
                 # Bufferizzato: si vede solo se il file, nel complesso, fallisce.
                 s.info(f"OK - Test N.{i}: {test_note}")
             else:
@@ -268,7 +360,18 @@ class Manager:
 
             results["details"].append(detail)
 
-        return {"success": results["failed"] == 0, "data": results}
+        results["exports"] = {
+            alias: sorted(methods)
+            for alias, methods in export_methods.items()
+        }
+        missing_exports = set(exports) - used_exports if isinstance(exports, dict) else set()
+        if missing_exports:
+            message = f"Export non testati: {', '.join(sorted(missing_exports))}"
+            results["export_errors"].append(message)
+            s.error(message)
+
+        results["success"] = results["failed"] == 0 and not results["export_errors"]
+        return {"success": results["success"], "data": results}
 
     @staticmethod
     def _record_setup_error(results: dict, s: "diagnostic.LogScope", i: int, test_note: str, target, message: str) -> None:
