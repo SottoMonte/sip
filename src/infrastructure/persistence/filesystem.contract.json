@@ -2,56 +2,16 @@
   "requires": [
     "watchdog"
   ],
+  "contract_version": 2,
+  "exports": {
+    "filter": [
+      "Adapter.filter"
+    ]
+  },
   "hashes": {
-    "FileWatcherHandler": {
-      "on_modified": {
-        "production": "53e09aab8ce5e9dac86a3433a9ffe84e7dae24bf73fde5a99ad3af95ad86e3cf"
-      },
-      "on_created": {
-        "production": "531c9ccff8c280665a06cd6f4ddf0916c0c2a4fef2d0319cb3857c4819cad608"
-      },
-      "on_deleted": {
-        "production": "6cf4283465600fe06673e2bc070146c2553a89d40e21687f469785dc8d7486d1"
-      },
-      "on_moved": {
-        "production": "2bdad2bba1955919c8b2c6792f41903a526d69bd7c977913de48a668fde41d73"
-      }
-    },
     "Adapter": {
-      "start": {
-        "production": "bd72597f22ef5ff1076ea86c23a7ad3761c46815e96a35bc8b41331d86ccb738"
-      },
-      "stop": {
-        "production": "3bcbe7abee0fbff4fab36c5cdf62c2d8594ec5ccceb9d1d581237bec7bd4eea2"
-      },
-      "handle_watcher_event": {
-        "production": "570c17a96fa6dac0a8af7d29e79cc6bae9dc179dd624eb626609e081544b0c1c"
-      },
-      "stop_watcher": {
-        "production": "0c0a940ea1cec33426bb50f2c0b8822aa7e0bb89e0fe2ae4be01eb1a84ea7525"
-      },
-      "request": {
-        "production": "535ade7b19e04e36f80d107a5a0b4b0dbcc49fc322d0619052bb53d32a04b51b"
-      },
-      "create": {
-        "production": "9130b460b03a557109e1ce31953c72042466e36be291322ec279a136dd269385"
-      },
-      "delete": {
-        "production": "bb5550670a474e4bce631dc4abdbbb94b4453487cf737f1c664a13c209ce2811"
-      },
-      "update": {
-        "production": "cf6541ea58fdfed44a9a96c5aca601546ec2fc4cafaa55cd57b1d28f0e058e9f"
-      },
-      "read": {
-        "production": "7760f9f12b3bb49a011dda7e32fc7caab35fd5b05e2dd69b45fbb53c06394aa5"
-      },
-      "view": {
-        "production": "3d9d45a00fc7c6b6c95c53db7977f96dcd39c5bfa44d6fb142f3e0c27dc509e9"
-      },
-      "query": {
-        "production": "89c9fc172e35ed269a7028f1bdbdb73e3cf36eccc9cf52c47e10672c3dd2adca"
-      },
       "filter": {
+        "test": "2c74ebf41db20853795548371da7baa3167682e683f2087fea8e56c20d4ab24e",
         "production": "2c74ebf41db20853795548371da7baa3167682e683f2087fea8e56c20d4ab24e"
       }
     }

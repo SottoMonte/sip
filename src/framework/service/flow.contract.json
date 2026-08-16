@@ -1,5 +1,26 @@
 {
-    "requires": [
-        "networkx"
+  "requires": [
+    "networkx"
+  ],
+  "contract_version": 2,
+  "tested_at": "2026-08-16T15:18:41.916535+00:00",
+  "git_commit": "b91df00",
+  "exports": {
+    "reset": [
+      "reset"
+    ],
+    "switch": [
+      "switch"
     ]
+  },
+  "hashes": {
+    "reset": {
+      "test": "efabe157fb368873be24c5dce2710178c1df694ecde6a4782b4006066b944660",
+      "production": "efabe157fb368873be24c5dce2710178c1df694ecde6a4782b4006066b944660"
+    },
+    "switch": {
+      "test": "eebf5c5efe090b8ec6ae6134781481d8eb0792c5a3e3b78ff1568f806a8444fb",
+      "production": "eebf5c5efe090b8ec6ae6134781481d8eb0792c5a3e3b78ff1568f806a8444fb"
+    }
+  }
 }

@@ -169,7 +169,47 @@ class Infrastructure:
         :param module_path: Percorso del modulo (es. "framework.manager.tester")
         :return: Il modulo importato
         """
-        return importlib.import_module(module_path)
+        try:
+            return importlib.import_module(module_path)
+        except ModuleNotFoundError as import_error:
+            parts = module_path.split(".")
+            candidates = [
+                Path("src") / Path(*parts).with_suffix(".py"),
+            ]
+            for split in range(len(parts) - 1, 0, -1):
+                directory = Path("src") / Path(*parts[:split])
+                filename = ".".join(parts[split:]) + ".py"
+                candidates.append(directory / filename)
+
+            source_path = next((path for path in candidates if path.is_file()), None)
+            if source_path is None:
+                raise import_error
+
+            package_names = [".".join(parts[:index]) for index in range(1, len(parts))]
+            for package_name in package_names:
+                if package_name in sys.modules:
+                    continue
+                package = types.ModuleType(package_name)
+                package.__path__ = []
+                package.__package__ = package_name.rpartition(".")[0]
+                sys.modules[package_name] = package
+                if "." in package_name:
+                    parent, child = package_name.rsplit(".", 1)
+                    setattr(sys.modules[parent], child, package)
+
+            spec = importlib.util.spec_from_file_location(module_path, source_path)
+            if spec is None or spec.loader is None:
+                raise ImportError(f"Impossibile creare ModuleSpec per {source_path}")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_path] = module
+            parent, child = module_path.rsplit(".", 1)
+            setattr(sys.modules[parent], child, module)
+            try:
+                spec.loader.exec_module(module)
+            except Exception:
+                sys.modules.pop(module_path, None)
+                raise
+            return module
 
 
 # ============================================================

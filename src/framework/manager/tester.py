@@ -1,4 +1,5 @@
 import os
+import inspect
 import uuid
 from typing import Optional
 
@@ -66,7 +67,11 @@ def resolve_export_alias(
 
     target_name = resolve_target_name(target)
     for object_alias, exported_object in object_exports.values():
-        class_name = type(exported_object).__name__
+        class_name = (
+            exported_object.__name__
+            if inspect.isclass(exported_object)
+            else type(exported_object).__name__
+        )
         if target_name.startswith(f"{class_name}."):
             return object_alias
 
@@ -237,12 +242,12 @@ class Manager:
         exported_targets = {
             id(target): alias
             for alias, target in exports.items()
-            if callable(target)
+            if callable(target) and not inspect.isclass(target)
         } if isinstance(exports, dict) else {}
         exported_objects = {
             id(target): (alias, target)
             for alias, target in exports.items()
-            if not callable(target) and target is not None
+            if (not callable(target) or inspect.isclass(target)) and target is not None
         } if isinstance(exports, dict) else {}
         export_methods = {
             alias: set()
