@@ -1,0 +1,30 @@
+{
+  "name": "omniport-dsl-language",
+  "displayName": "OmniPort DSL Language",
+  "description": "Syntax highlighting and editor support for OmniPort DSL files.",
+  "version": "0.1.0",
+  "publisher": "sottomonte",
+  "engines": {
+    "vscode": ">=1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "omniport-dsl",
+        "aliases": ["OmniPort DSL", "DSL"],
+        "extensions": [".dsl"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "omniport-dsl",
+        "scopeName": "source.omniport-dsl",
+        "path": "./syntaxes/omniport-dsl.tmLanguage.json"
+      }
+    ]
+  }
+}

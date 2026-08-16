@@ -1,0 +1,90 @@
+{
+  "scopeName": "source.omniport-dsl",
+  "name": "OmniPort DSL",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#declarations" },
+    { "include": "#tasks" },
+    { "include": "#context-vars" },
+    { "include": "#keywords" },
+    { "include": "#builtins" },
+    { "include": "#constants" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#properties" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.omniport-dsl", "match": "//.*$" },
+        { "name": "comment.block.omniport-dsl", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.omniport-dsl",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "name": "constant.character.escape.omniport-dsl", "match": "\\\\." }]
+        },
+        {
+          "name": "string.quoted.single.omniport-dsl",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "name": "constant.character.escape.omniport-dsl", "match": "\\\\." }]
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        { "name": "storage.type.omniport-dsl", "match": "\\b(?:natural|integer|real|rational|boolean|complex|matrix|vector|set|int|i8|i16|i32|i64|n8|n16|n32|n64|f32|f64|str|bool|dict|list|any|type|tuple|function)\\b(?=\\s*:)" },
+        { "name": "keyword.operator.assignment.omniport-dsl", "match": ":=" }
+      ]
+    },
+    "tasks": {
+      "patterns": [
+        { "name": "keyword.control.task.omniport-dsl", "match": "->" },
+        { "name": "entity.name.function.omniport-dsl", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()" }
+      ]
+    },
+    "context-vars": {
+      "patterns": [
+        { "name": "variable.language.context.omniport-dsl", "match": "@[A-Za-z_][A-Za-z0-9_.]*" }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        { "name": "keyword.control.omniport-dsl", "match": "\\b(?:and|or|not|in)\\b" },
+        { "name": "keyword.operator.omniport-dsl", "match": "\\b(?:import|resource)\\b(?=\\s*\\()" }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        { "name": "support.function.builtin.omniport-dsl", "match": "\\b(?:random|foreach|switch|branch|reset|transform|get|normalize|put|format|convert|keys|values|union|print|pass|exit)\\b(?=\\s*\\()" }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        { "name": "constant.language.omniport-dsl", "match": "\\b(?:true|false|none)\\b" }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.omniport-dsl", "match": "\\b\\d+(?:\\.\\d+)?\\b" }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.omniport-dsl", "match": "\\|>|==|!=|>=|<=|[+*/%^<>:&|!-]" }
+      ]
+    },
+    "properties": {
+      "patterns": [
+        { "name": "support.type.property-name.omniport-dsl", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*:)" },
+        { "name": "variable.other.member.omniport-dsl", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_*]*)+\\b" }
+      ]
+    }
+  }
+}
