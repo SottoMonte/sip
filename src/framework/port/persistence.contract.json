@@ -1,7 +1,7 @@
 {
   "contract_version": 2,
-  "tested_at": "2026-08-16T15:20:09.775990+00:00",
-  "git_commit": "b91df00",
+  "tested_at": "2026-08-16T15:33:27.710264+00:00",
+  "git_commit": "8545f9d",
   "exports": {
     "create": [
       "Port.create"
@@ -32,13 +32,13 @@
         "test": "e3b9cc5fa356723cdd240147771d0bb2a0d1c46e17e7a3059f86dcd882a45134",
         "production": "e3b9cc5fa356723cdd240147771d0bb2a0d1c46e17e7a3059f86dcd882a45134"
       },
-      "query": {
-        "test": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5",
-        "production": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5"
-      },
       "read": {
         "test": "1f1b6c6294dbbb4b1f469dd0e440b1df802a202778948e16cac3676216ba287f",
         "production": "1f1b6c6294dbbb4b1f469dd0e440b1df802a202778948e16cac3676216ba287f"
+      },
+      "query": {
+        "test": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5",
+        "production": "20e5ca0a618ec602a696a99c6c5eab724812662d09a99532a6f1d41c63f300d5"
       },
       "update": {
         "test": "d535ecf638fe31d7a01e21e701bed41d0e96d9c9c78aa0984e1561f170945c0c",

@@ -1,7 +1,7 @@
 {
   "contract_version": 2,
-  "tested_at": "2026-08-16T15:18:41.907321+00:00",
-  "git_commit": "b91df00",
+  "tested_at": "2026-08-16T15:33:27.741127+00:00",
+  "git_commit": "8545f9d",
   "exports": {
     "get_requirements": [
       "Repository.get_requirements"
@@ -12,13 +12,13 @@
   },
   "hashes": {
     "Repository": {
-      "get_requirements": {
-        "test": "74b0e92d273e39c07ee33f0568ad555aeda7ed3130e6a2f2de1dc23fe5743c00",
-        "production": "74b0e92d273e39c07ee33f0568ad555aeda7ed3130e6a2f2de1dc23fe5743c00"
-      },
       "select": {
         "test": "710bd4ece15f563addcd5b33e21998340930479873561d6ccd0f087edc9999cf",
         "production": "710bd4ece15f563addcd5b33e21998340930479873561d6ccd0f087edc9999cf"
+      },
+      "get_requirements": {
+        "test": "74b0e92d273e39c07ee33f0568ad555aeda7ed3130e6a2f2de1dc23fe5743c00",
+        "production": "74b0e92d273e39c07ee33f0568ad555aeda7ed3130e6a2f2de1dc23fe5743c00"
       }
     }
   }

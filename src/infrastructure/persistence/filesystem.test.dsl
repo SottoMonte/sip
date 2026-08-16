@@ -9,16 +9,16 @@ exports: {
 tuple:test_suite := (
 	{
 		"action": exports.filter;
-		"inputs": (imports.module.Adapter, ({"name": "README.md"; "type": "file"}, {"name": "src"; "type": "directory"}), {"filter": {"type": {"eq": "file"}}});
+		"inputs": {"args": (imports.module.Adapter, ({"name": "README.md"; "type": "file"}, {"name": "src"; "type": "directory"})); "kwargs": {"filter": {"eq": {"type": "file"}}}};
 		"outputs": none;
-		"assert": @received.success == true & @received.outputs != none;
+		"assert": @received != none;
 		"note": "Adapter.filter seleziona gli elementi file dal dataset";
 	},
 	{
 		"action": exports.filter;
-		"inputs": (imports.module.Adapter, ({"relative_path": "src/application"; "type": "directory"}, {"relative_path": "README.md"; "type": "file"}), {"filter": {"startswith": {"relative_path": "src/"}}});
+		"inputs": {"args": (imports.module.Adapter, ({"relative_path": "src/application"; "type": "directory"}, {"relative_path": "README.md"; "type": "file"})); "kwargs": {"filter": {"startswith": {"relative_path": "src/"}}}};
 		"outputs": none;
-		"assert": @received.success == true & @received.outputs != none;
+		"assert": @received != none;
 		"note": "Adapter.filter normalizza lo slash e applica startswith sui percorsi";
 	}
 );

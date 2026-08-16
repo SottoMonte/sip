@@ -59,6 +59,10 @@ def resolve_export_alias(
     if alias:
         return alias
 
+    exported = object_exports.get(id(target))
+    if exported:
+        return exported[0]
+
     owner = getattr(target, "__self__", None)
     if owner is not None:
         exported = object_exports.get(id(owner))
