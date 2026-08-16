@@ -1,27 +1,27 @@
 {
+  "contract_version": 2,
+  "tested_at": "2026-08-16T12:16:13.211964+00:00",
+  "git_commit": "f7c5099",
+  "exports": {
+    "resolve_filter": [
+      "resolve_filter"
+    ],
+    "resolve_target_name": [
+      "resolve_target_name"
+    ]
+  },
   "hashes": {
+    "resolve_target_name": {
+      "test": "39ba38ca3ad1ef1dd54dd1cffd3697ad5d9b13481cff5d5f58c6b5ddf5a2ab5c",
+      "production": "39ba38ca3ad1ef1dd54dd1cffd3697ad5d9b13481cff5d5f58c6b5ddf5a2ab5c"
+    },
     "resolve_filter": {
       "test": "f33bea95ba734634deab134f1c5efbb6b99c37275ff6e527695e33c3193fe661",
       "production": "f33bea95ba734634deab134f1c5efbb6b99c37275ff6e527695e33c3193fe661"
-    },
-    "Manager": {
-      "startup": {
-        "production": "504e944be44128c45a0ee5e0cf06999d5c07b59a8df11e05f83ad862ee909e76"
-      },
-      "shutdown": {
-        "production": "8c7c565e112a297d6aa4b837dd71bd54270bebfc75751270bd05ec9dc41416db"
-      },
-      "run": {
-        "production": "cfc3cbb88785643346e161b3d3c045fcd731d3c6a589fb230765a42402bb0bfa"
-      }
-    },
-    "resolve_target_name": {
-      "production": "95e2ef1f8612452d8610b7322f7d88fbaee04853a67c5b7147ad708e54676f27",
-      "test": "95e2ef1f8612452d8610b7322f7d88fbaee04853a67c5b7147ad708e54676f27"
     }
   },
-  "exports": [
-    "resolve_filter",
-    "resolve_target_name"
-  ]
+  "test_counts": {
+    "resolve_filter": 2,
+    "resolve_target_name": 1
+  }
 }

@@ -668,6 +668,7 @@ class Loader:
 
         data = outcome.get("data", {})
         manifest = data.get("exports")
+        contract_exports = manifest if isinstance(manifest, dict) else None
         declared_exports = None
         if isinstance(manifest, dict):
             declared_exports = []
@@ -703,7 +704,11 @@ class Loader:
             return
 
         hashes = {n: reflection.hash_text(available[n]) for n in tested}
-        contract.record_tested(source_path, hashes, exports=declared_exports)
+        contract.record_tested(
+            source_path,
+            hashes,
+            exports=contract_exports if contract_exports is not None else declared_exports,
+        )
         print(f"[🔏] Contratto aggiornato: {source_path} → {', '.join(sorted(hashes))}")
 
     def get_managers(self) -> dict:

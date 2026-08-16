@@ -1,8 +1,11 @@
 import os
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 import json
 
 class Contract:
+    VERSION = 2
     """Gestione dei contratti (*.contract.json / *.json) associati a un
     qualunque file sorgente — non solo adapter: manager, service, port, ecc.
 
@@ -13,7 +16,10 @@ class Contract:
        componente per componente, che il codice in esecuzione è quello che ha
        superato i test — struttura:
 
-        "exports": ["Manager.send", "Manager.receive"],
+                "contract_version": 2,
+                "exports": {
+                    "messenger": ["Manager.send", "Manager.receive"]
+                },
 
         "hashes": {
           "Port": {
@@ -57,7 +63,50 @@ class Contract:
 
     @staticmethod
     def write(path: str, data: dict) -> None:
-        Path(path).write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        def json_safe(value):
+            if isinstance(value, dict):
+                return {str(key): json_safe(item) for key, item in value.items()}
+            if isinstance(value, (list, tuple, set)):
+                return [json_safe(item) for item in value]
+            return value
+
+        target = Path(path)
+        temporary = target.with_suffix(target.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(json_safe(data), indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        temporary.replace(target)
+
+    @staticmethod
+    def _git_commit() -> str | None:
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            commit = result.stdout.strip()
+            return commit or None
+        except OSError:
+            return None
+
+    @staticmethod
+    def _export_names(exports) -> list[str] | None:
+        if exports is None:
+            return None
+        if isinstance(exports, dict):
+            names = []
+            for methods in exports.values():
+                if isinstance(methods, list):
+                    names.extend(methods)
+                elif isinstance(methods, str):
+                    names.append(methods)
+            return sorted(set(names))
+        if isinstance(exports, list):
+            return sorted(set(exports))
+        raise ValueError("'exports' deve essere una lista o un dizionario")
 
     @staticmethod
     def _entry(hashes: dict, name: str) -> dict:
@@ -81,12 +130,29 @@ class Contract:
         if not component_hashes:
             return
         path = Contract.for_source(source_path)
-        contract = Contract.read(path)
+        previous = Contract.read(path)
         if exports is not None:
-            contract["exports"] = sorted(set(exports))
+            # Un nuovo test è una nuova certificazione: elimina hash rimasti
+            # da export rimossi, preservando solo le dipendenze del contract.
+            contract = {
+                key: value
+                for key, value in previous.items()
+                if key == "requires"
+            }
+            contract.update({
+                "contract_version": Contract.VERSION,
+                "tested_at": datetime.now(timezone.utc).isoformat(),
+                "git_commit": Contract._git_commit(),
+                "exports": exports,
+                "hashes": {},
+            })
+        else:
+            contract = previous
         hashes = contract.setdefault("hashes", {})
         for name, component_hash in component_hashes.items():
-            Contract._entry(hashes, name)["test"] = component_hash
+            entry = Contract._entry(hashes, name)
+            entry["test"] = component_hash
+            entry["production"] = component_hash
         Contract.write(path, contract)
 
     @staticmethod
@@ -105,40 +171,45 @@ class Contract:
 
         contract = Contract.read(contract_path)
         declared_exports = contract.get("exports")
-        if declared_exports is not None and not isinstance(declared_exports, list):
+        names = Contract._export_names(declared_exports)
+        if declared_exports is not None and names is None:
             raise RuntimeError(
-                f"Contract non valido: 'exports' deve essere una lista in '{contract_path}'"
+                f"Contract non valido: 'exports' deve essere una lista o un dizionario in '{contract_path}'"
             )
 
         components = introspection.Reflection.module_components(
             module,
-            set(declared_exports) if declared_exports is not None else None,
+            set(names) if names is not None else None,
         )
-        if not components and declared_exports is None:
+        if not components and names is None:
             return True
 
         hashes = contract.setdefault("hashes", {})
 
-        stale = []
-        names = declared_exports if declared_exports is not None else components.keys()
-        for name in names:
+        missing = []
+        modified = []
+        names_to_verify = names if names is not None else components.keys()
+        for name in names_to_verify:
             source = components.get(name)
             if source is None:
-                stale.append(name)
+                missing.append(name)
                 continue
             current = introspection.Reflection.hash_text(source)
             entry = Contract._entry(hashes, name)
             tested = entry.get("test")
             entry["production"] = current
             if tested is None or tested != current:
-                stale.append(name)
+                modified.append(name)
 
         Contract.write(contract_path, contract)
 
-        if stale:
-            print(f"[!] '{source_path}': componenti non testati o modificati dopo l'ultimo test: {', '.join(stale)}")
-        else:
-            print(f"[✓] '{source_path}': tutti i componenti testati e verificati.")
+        stale = missing + modified
+        if missing:
+            print(f"[!] '{source_path}': export mancanti nel codice: {', '.join(missing)}")
+        if modified:
+            print(f"[!] '{source_path}': export non testati o modificati: {', '.join(modified)}")
+        if not stale:
+            print(f"[✓] '{source_path}': tutti gli export testati e verificati.")
 
         if strict and stale:
             raise RuntimeError(

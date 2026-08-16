@@ -44,7 +44,8 @@ def resolve_filter(raw: str | None) -> Optional[str]:
 
 def resolve_target_name(target) -> str:
     """Ritorna il nome stabile usato per associare un callable al contract."""
-    return getattr(target, "__qualname__", None) or str(target)
+    name = getattr(target, "__qualname__", None)
+    return name if isinstance(name, str) else str(name or target)
 
 
 def resolve_export_alias(
@@ -59,9 +60,9 @@ def resolve_export_alias(
 
     owner = getattr(target, "__self__", None)
     if owner is not None:
-        alias = object_exports.get(id(owner))
-        if alias:
-            return alias
+        exported = object_exports.get(id(owner))
+        if exported:
+            return exported[0]
 
     target_name = resolve_target_name(target)
     for object_alias, exported_object in object_exports.values():
@@ -244,7 +245,7 @@ class Manager:
         } if isinstance(exports, dict) else {}
         export_methods = {
             alias: set()
-            for alias in exports
+            for alias, target in exports.items()
         } if isinstance(exports, dict) else {}
         invalid_exports = [
             alias for alias, target in exports.items()
