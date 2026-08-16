@@ -28,7 +28,44 @@ jobs:
 
       - name: Check generated contracts
         run: |
-          if ! git diff --exit-code -- '**/*.contract.json' '**/*.json'; then
-            echo "::error::I contract non sono allineati all'ultima esecuzione dei test. Esegui 'python3 public/main.py --test' in locale e committa i contract rigenerati."
-            exit 1
-          fi
+          python3 - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          def normalized_json(value):
+            data = json.loads(value)
+            if isinstance(data, dict):
+              data.pop("tested_at", None)
+              data.pop("git_commit", None)
+            return json.dumps(data, sort_keys=True, separators=(",", ":"))
+
+          changed = subprocess.check_output(
+            ["git", "diff", "--name-only", "--", "**/*.contract.json", "**/*.json"],
+            text=True,
+          ).splitlines()
+          semantic_changes = []
+
+          for name in changed:
+            path = Path(name)
+            current = path.read_text(encoding="utf-8")
+            previous_result = subprocess.run(
+              ["git", "show", f"HEAD:{name}"],
+              capture_output=True,
+              text=True,
+            )
+            if previous_result.returncode != 0:
+              semantic_changes.append(name)
+              continue
+            if normalized_json(current) != normalized_json(previous_result.stdout):
+              semantic_changes.append(name)
+
+          if semantic_changes:
+            print("::error::I contract contengono modifiche semantiche:")
+            print("\n".join(semantic_changes))
+            print("Esegui 'python3 public/main.py --test' e committa i contract rigenerati.")
+            sys.exit(1)
+
+          print("I contract sono semanticamente allineati; ignorati solo tested_at, git_commit e l'ordine delle chiavi JSON.")
+          PY
