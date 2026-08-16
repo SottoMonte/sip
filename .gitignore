@@ -4,6 +4,10 @@
 
 *.wav
 
+#framework
+.diagnostics/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

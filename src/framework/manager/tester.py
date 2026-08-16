@@ -16,6 +16,10 @@ _FILTER_ALIASES: dict[str, str] = {
     "infrastructure":  "src/infrastructure",
 }
 
+# Logger legato a questo manager: ogni riga stampata da qui porta sempre
+# il tag colorato [tester], senza doverlo ripetere ad ogni chiamata.
+_logger = diagnostic.get_logger("tester")
+
 
 def resolve_filter(raw: str | None) -> Optional[str]:
     """Ritorna il prefisso di percorso su cui filtrare, o None (tutto).
@@ -30,21 +34,18 @@ def resolve_filter(raw: str | None) -> Optional[str]:
     """
     if not raw:
         return None
-    # 1) Alias esatto  →  managers
     if raw in _FILTER_ALIASES:
         return _FILTER_ALIASES[raw]
-    # 2) Alias + sub   →  managers/defender  oppure  infrastructure/authentication
     for alias, base in _FILTER_ALIASES.items():
         if raw.startswith(alias + '/'):
             return f"{base}/{raw[len(alias) + 1:]}"
-    # 3) Percorso src diretto (fallback)
     return raw
 
 
 class Manager:
     def __init__(self, loader: loader_module.Loader, **constants):
         """Inizializza il Manager per l'esecuzione dei test DSL.
-        
+
         :param loader: Il Loader del framework (dipendenza iniettata)
         :param constants: Configurazioni aggiuntive (incluso filtro da CLI)
         """
@@ -60,14 +61,25 @@ class Manager:
             return True
         return path.replace('\\', '/').startswith(self.prefix.replace('\\', '/'))
 
+    def _discover_test_files(self) -> list[str]:
+        """Elenca in anticipo tutti i file .test.dsl da eseguire, così da
+        poter mostrare un contatore [i/N] e un riepilogo coerente."""
+        found = []
+        for root, _, files in os.walk('./src'):
+            for file in files:
+                if not file.endswith('.test.dsl'):
+                    continue
+                path = os.path.join(root, file).replace('./', '')
+                if self._matches_filter(path):
+                    found.append(path)
+        return sorted(found)
+
     # ── lifecycle ─────────────────────────────────────────────────────────────
-    
+
     async def startup(self, session=None):
-        """Hook di startup (nessuna logica richiesta per il tester)."""
         pass
-    
+
     async def shutdown(self, session=None):
-        """Hook di shutdown (nessuna logica richiesta per il tester)."""
         pass
 
     async def run(self, **constants):
@@ -76,38 +88,88 @@ class Manager:
         self.filter_raw = filter_raw
         self.prefix = resolve_filter(filter_raw)
         label = self.prefix or 'tutti'
-        diagnostic.log("INFO", f"Avvio esecuzione suite di test… filtro: {label}", emoji="🧪")
+
+        test_files = self._discover_test_files()
+        _logger.info(f"Avvio esecuzione suite di test… filtro: {label}", file_trovati=len(test_files))
 
         interp = language.Interpreter()
         await interp.start()
 
-        for root, _, files in os.walk('./src'):
-            for file in files:
-                if not file.endswith('.test.dsl'):
-                    continue
-                path = os.path.join(root, file).replace('./', '')
-                if not self._matches_filter(path):
-                    continue
-                diagnostic.log("INFO", f"Esecuzione test: {path}", emoji="🔍")
-                
+        summary = {
+            "file_totali": len(test_files),
+            "file_ok": 0,
+            "file_con_test_falliti": [],   # il file gira, ma almeno un test fallisce
+            "file_non_eseguiti": [],       # il file non parte proprio (parse/runtime error)
+            "test_totali": 0,
+            "test_passati": 0,
+            "test_falliti": 0,
+        }
+
+        for i, path in enumerate(test_files, start=1):
+            # Ogni file ha il suo "scope": se tutti i test passano viene
+            # stampata UNA riga compatta; se qualcosa fallisce, viene
+            # mostrato tutto il dettaglio bufferizzato (incluso traceback).
+            with _logger.scope(f"[{i}/{len(test_files)}] {path}") as s:
                 try:
                     res = await self.loader.resource(path)
                     source = flow.value_of(res) if flow.is_result(res) else res
                     await interp.load_file(path, source)
-                    outcome = await self._execute_dsl(interp, path)
+                    outcome = await self._execute_dsl(interp, path, s)
                     self.loader.record_contract(path, outcome)
+
+                    data = outcome.get("data", {})
+                    if "total" in data:
+                        # Il file è partito ed è stata eseguita almeno la
+                        # raccolta dei test (anche se poi qualcuno fallisce).
+                        s.set_summary(
+                            passed=data.get("passed", 0),
+                            failed=data.get("failed", 0),
+                            total=data.get("total", 0),
+                        )
+                        summary["test_totali"] += data.get("total", 0)
+                        summary["test_passati"] += data.get("passed", 0)
+                        summary["test_falliti"] += data.get("failed", 0)
+
+                        if outcome.get("success"):
+                            summary["file_ok"] += 1
+                        else:
+                            s.mark_failed()
+                            summary["file_con_test_falliti"].append(path)
+                    else:
+                        # Il file non è nemmeno partito (es. errore di parsing
+                        # o runtime prima di poter leggere la test_suite):
+                        # non ha senso mostrare "0 passati/falliti".
+                        s.mark_failed()
+                        summary["file_non_eseguiti"].append(path)
+
                 except Exception as e:
-                    diagnostic.log("ERROR", f"Errore durante l'esecuzione di {path}: {e}", emoji="⚠️")
+                    s.error(f"Impossibile eseguire il file DSL {path}", exception=e)
+                    summary["file_non_eseguiti"].append(path)
                     self.loader.record_contract(path, {"success": False, "data": {"error": str(e)}})
 
-    async def _execute_dsl(self, interp: language.Interpreter, path: str) -> dict:
+        esito = "PASSED" if not summary["file_con_test_falliti"] and not summary["file_non_eseguiti"] else "FAILED"
+        log_fn = _logger.error if esito == "FAILED" else _logger.info
+        log_fn(
+            f"Riepilogo suite di test: {esito}",
+            file_totali=summary["file_totali"],
+            file_ok=summary["file_ok"],
+            file_con_test_falliti=summary["file_con_test_falliti"],
+            file_non_eseguiti=summary["file_non_eseguiti"],
+            test_totali=summary["test_totali"],
+            test_passati=summary["test_passati"],
+            test_falliti=summary["test_falliti"],
+        )
+
+    # ── esecuzione di un singolo file .test.dsl ────────────────────────────────
+
+    async def _execute_dsl(self, interp: language.Interpreter, path: str, s: "diagnostic.LogScope") -> dict:
         """Esegue una suite di test DSL e registra i risultati.
-        
+
         :param interp: L'interprete DSL
         :param path: Percorso del file .test.dsl
+        :param s: Scope di log del file corrente (vedi Manager.run)
         :return: Dizionario con esito e dettagli dei test
         """
-        # Crea una sessione per questo test
         session_id = str(uuid.uuid4())
         session_dict = {
             'id': session_id,
@@ -115,8 +177,7 @@ class Manager:
             'providers': {},
             'user': {'id': 'tester', 'role': 'system'}
         }
-        
-        # Registra la sessione nel runner
+
         interp.session_create(
             sid=session_id,
             env=language.DSL_FUNCTIONS | {
@@ -124,96 +185,97 @@ class Manager:
                 'import': self.loader.import_module
             }
         )
-        
-        # Crea la SessionHandle
+
         session = language.SessionHandle(interp, session=session_dict)
-        
-        # Esegui il file DSL sulla sessione
+
         try:
             ctx = await session.run(path)
         except Exception as e:
-            diagnostic.log("ERROR", f"Errore durante l'esecuzione del file DSL {path}: {e}", emoji="⚠️")
+            s.error(
+                f"Il file DSL {path} non è stato eseguito correttamente (errore di parsing o runtime)",
+                exception=e,
+            )
             return {"success": False, "data": {"error": str(e)}}
-        
-        # ── estrazione della suite di test ────────────────────────────────
+
         test_suite = ctx.get('test_suite', []) or []
         if isinstance(test_suite, dict):
             test_suite = [test_suite]
-        
-        results = {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "errors": [],
-            "details": []
-        }
-        
-        # ── esecuzione di ogni test ───────────────────────────────────────
+
+        results = {"total": 0, "passed": 0, "failed": 0, "errors": [], "details": []}
+
         for i, test in enumerate(test_suite):
             if not isinstance(test, dict):
                 continue
-            
+
             results["total"] += 1
             target = test.get('action')
             args = test.get('inputs', ())
             expected = test.get('outputs')
             assert_fn = test.get('assert')
             test_note = test.get('note', f'Test #{i}')
-            
+
+            # ── validazione preventiva ──────────────────────────────────
+            if not callable(target):
+                self._record_setup_error(
+                    results, s, i, test_note, target,
+                    f"'action' non è una funzione valida (valore risolto: {target!r}). "
+                    f"Controlla il nome nel file DSL e che l'import correlato sia andato a buon fine."
+                )
+                continue
+
+            if not callable(assert_fn):
+                self._record_setup_error(
+                    results, s, i, test_note, target,
+                    f"'assert' non è una funzione valida (valore risolto: {assert_fn!r})."
+                )
+                continue
+
+            # ── fase 1: invocazione dell'azione ─────────────────────────
             try:
-                # Invoca l'azione target con gli argomenti forniti
                 if isinstance(args, dict):
                     received = await interp.call(target, (), args)
                 elif isinstance(args, (list, tuple)):
                     received = await interp.call(target, args)
                 else:
                     received = await interp.call(target, (args,))
-                
-                # Valuta l'assertion
-                ok = await interp.call(assert_fn, (), {"received": received, "expected": expected})
-                results["passed" if ok else "failed"] += 1
-                status = "OK" if ok else "FAIL"
-                detail = {"target": str(target), "status": status, "note": test_note}
-                
-                if not ok:
-                    detail |= {"expected": expected, "received": received}
-                
-                results["details"].append(detail)
-                
-                if ok:
-                    diagnostic.log("INFO", f"OK - Test N.{i}: {test_note}", emoji="✅")
-                else:
-                    diagnostic.log(
-                        "WARNING",
-                        f"FAIL - Test N.{i}: {test_note}",
-                        expected=expected,
-                        received=received,
-                        emoji="❌"
-                    )
-            
             except Exception as e:
                 results["failed"] += 1
-                results["errors"].append({"target": str(target), "error": str(e), "test_note": test_note})
-                results["details"].append({
-                    "target": str(target),
-                    "status": "ERROR",
-                    "message": str(e),
-                    "note": test_note
-                })
-                diagnostic.log("ERROR", f"Test N.{i}: ERROR - {test_note}", error=str(e), emoji="⚠️")
-        
-        # ── riepilogo dei risultati ───────────────────────────────────────
-        status = "PASSED" if results["failed"] == 0 else "FAILED"
-        diagnostic.log(
-            "INFO",
-            f"DSL Test {path}: {status}",
-            total=results["total"],
-            passed=results["passed"],
-            failed=results["failed"],
-            emoji="📊"
-        )
-        
-        # Chiudi la sessione
-        await session.close()
-        
+                results["errors"].append({"target": str(target), "error": str(e), "test_note": test_note, "phase": "action"})
+                results["details"].append({"target": str(target), "status": "ERROR", "phase": "action", "message": str(e), "note": test_note, "inputs": args})
+                s.error(f"Test N.{i} ({test_note}): errore nell'azione '{target}'", exception=e, inputs=args)
+                continue
+
+            # ── fase 2: valutazione dell'assert ─────────────────────────
+            try:
+                ok = await interp.call(assert_fn, (), {"received": received, "expected": expected})
+            except Exception as e:
+                results["failed"] += 1
+                results["errors"].append({"target": str(target), "error": str(e), "test_note": test_note, "phase": "assert"})
+                results["details"].append({"target": str(target), "status": "ERROR", "phase": "assert", "message": str(e), "note": test_note, "received": received, "expected": expected})
+                s.error(f"Test N.{i} ({test_note}): errore nella valutazione dell'assert", exception=e, expected=expected, received=received)
+                continue
+
+            results["passed" if ok else "failed"] += 1
+            detail = {"target": str(target), "status": "OK" if ok else "FAIL", "note": test_note}
+
+            if ok:
+                # Bufferizzato: si vede solo se il file, nel complesso, fallisce.
+                s.info(f"OK - Test N.{i}: {test_note}")
+            else:
+                detail |= {"expected": expected, "received": received, "inputs": args}
+                s.warning(f"FAIL - Test N.{i}: {test_note}", inputs=args, expected=expected, received=received)
+                s.mark_failed()
+
+            results["details"].append(detail)
+
         return {"success": results["failed"] == 0, "data": results}
+
+    @staticmethod
+    def _record_setup_error(results: dict, s: "diagnostic.LogScope", i: int, test_note: str, target, message: str) -> None:
+        """Registra un test non partito per un problema di configurazione
+        (action/assert non risolti), distinguendolo da un vero fallimento
+        dell'azione o dell'assert."""
+        results["failed"] += 1
+        results["errors"].append({"target": str(target), "error": message, "test_note": test_note, "phase": "setup"})
+        results["details"].append({"target": str(target), "status": "ERROR", "phase": "setup", "message": message, "note": test_note})
+        s.error(f"Test N.{i} ({test_note}): setup non valido", dettaglio=message)

@@ -93,7 +93,7 @@ Questi pattern sono stati trovati nel codice esistente durante una review e sono
 Prima di creare o modificare business logic in un file `.dsl`, leggi sempre `src/application/dsl.md` per la sintassi completa e le funzioni built-in disponibili.
 
 **Costrutti principali:**
-- Assegnazione: `var_name := value;`
+- Assegnazione statica tipizzata: `any:var_name := value;` (per gli schemi usare `type:name := {...}`)
 - Pipe: `input |> function1(args) |> function2;`
 - Task/trigger: `trigger(kwargs) -> action_or_pipe;`
 - Trigger schedulati: `tick(schedule: 5) -> azione;`
@@ -107,6 +107,9 @@ Prima di creare o modificare business logic in un file `.dsl`, leggi sempre `src
 
 **Vincoli sintattici stretti:**
 - Niente virgole finali in dizionari `{}` o liste/tuple `()`, `[]`.
+- Il valore nullo del DSL è `none`, non `null` e non `None`.
+- Le dichiarazioni `:=` devono avere il prefisso di tipo (`any:name := ...`); `name := ...` non è una forma affidabile del grammar attuale.
+- Le chiamate a moduli Python importati sono affidabili per funzioni/metodi già esposti; il runner DSL dei test non costruisce in modo affidabile istanze Python arbitrarie né consente di patchare i loro attributi con assegnazioni imperative.
 - Commenti su singola riga con `//`. I blocchi `/* ... */` non si annidano: il primo `*/` incontrato chiude il blocco, indipendentemente dall'intenzione.
 
 ---
@@ -225,7 +228,7 @@ tuple:test_suite := (
 - **`"assert"`**: Qualunque espressione DSL che ritorni `true`/`false`. I valori testati sono disponibili come:
   - `@received` — il valore effettivo tornato dalla funzione
   - `@expected` — il valore dichiarato in `"outputs"`
-  - Puoi scrivere asserzioni complesse: `@received == @expected & @received != null` (AND), `@received == "OK" | @received == "SKIP"` (OR)
+    - Puoi scrivere asserzioni complesse: `@received == @expected & @received != none` (AND), `@received == "OK" | @received == "SKIP"` (OR)
 - **`"note"`**: Descrizione breve e leggibile del test, mostrata nei log quando passa o fallisce. **Obbligatoria.**
 
 ### Pattern Consigliati
@@ -258,7 +261,7 @@ tuple:test_suite := (
     "action": exports.validate_user;
     "inputs": {"name": "Alice", "age": 25};
     "outputs": true;
-    "assert": @received == @expected & @received != null;
+    "assert": @received == @expected & @received != none;
     "note": "validate_user accetta utente valido";
 }
 ```
@@ -268,7 +271,7 @@ tuple:test_suite := (
 {
     "action": exports.get_item;
     "inputs": ("items", "missing_key");
-    "outputs": null;
+    "outputs": none;
     "assert": @received == @expected;
     "note": "get_item ritorna null per chiave mancante (no crash)";
 }
@@ -306,7 +309,7 @@ tuple:test_suite := (
        "action": imports.module_name;  // Non è una funzione!
        "inputs": ();
        "outputs": true;
-       "assert": @received != null;
+    "assert": @received != none;
    }
    ```
    **Soluzione:** Testa una **funzione** del modulo importato, non il modulo stesso.

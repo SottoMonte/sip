@@ -177,7 +177,7 @@ class Manager:
                 return flow.error(session_result['errors'])
         return flow.success(session)
 
-    def  authorized(self, policy, **constants) -> bool:
+    def authorized(self, policy, **constants) -> bool:
         policy = self.get_policy(policy)
         rules = policy.get('rules', {})
         action, resource, location = constants.get('action', ''), constants.get('resource', ''), constants.get('location', '')

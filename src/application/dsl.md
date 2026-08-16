@@ -68,14 +68,20 @@ is_valid() -> (age >= 18) and not is_banned;
 ```
 
 ## 📦 Static Assignments (Variables and Types)
-Use `:=` for top-level static declarations, such as Data Schemas.
+Use `:=` for top-level static declarations. For a runtime value, use a type prefix;
+for schemas use the special `type:` prefix.
 
 ```dsl
 type:user_schema := {
     "name": { "type": "str", "required": true };
     "age":  { "type": "int", "default": 18 };
 };
+
+any:source := resource("src/application/policy/presentation/demo.dsl");
 ```
+
+La forma non tipizzata `name := value` non è supportata in modo affidabile dal
+grammar attuale. Il valore nullo del DSL è `none` (non `null` e non `None`).
 
 ## 🔌 Built-in Functions
 The DSL natively provides several built-in utilities:
@@ -93,13 +99,20 @@ The DSL natively provides several built-in utilities:
 
 ```dsl
 // resource() → carica il file come STRINGA
-my_source := resource("src/framework/manager/tester.py");
+any:my_source := resource("src/framework/manager/tester.py");
 // my_source è il codice sorgente (testo)
 
 // import() → carica il MODULO PYTHON
-my_module := import("framework.manager.tester");
+any:my_module := import("framework.manager.tester");
 // my_module è il modulo importato, puoi usare my_module.resolve_filter, etc.
 ```
+
+Nei test `.test.dsl`, `import()` è adatto a esporre funzioni e metodi già
+disponibili. Non va usato come se fosse un costruttore generale di oggetti
+Python: la costruzione di istanze e la modifica imperativa dei loro attributi
+non sono garantite dal runner DSL. Per testare un metodo che richiede stato
+interno, usare una fixture già iniettata dal runner oppure un test Python
+dedicato.
 
 ## 🌐 Context Variables (`@`)
 If you need to explicitly reference a specific runtime context variable instead of relying on standard resolution, you can prefix it with `@`.

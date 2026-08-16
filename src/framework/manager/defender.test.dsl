@@ -1,194 +1,146 @@
 imports: {
     'module': import("framework.manager.defender");
+    'regex': import("re");
+};
+
+roles: {
+    "guest": {
+        "resources": ["application/view/page/auth/login.xml"];
+    };
+};
+
+policies: {
+    "GET_ALLOW_PATH": {
+        "effect": "allow";
+        "target": {"action": "GET";};
+        "condition": (@resource in roles.guest.resources) & (@action == "GET");
+    };
+    "GET_ALLOW_ALL": {
+        "effect": "allow";
+        "target": {"action": "GET";};
+        "condition": @action == "GET";
+    };
+    "POST_ALLOW_ALL": {
+        "effect": "allow";
+        "target": {"action": "POST";};
+        "condition": @action == "POST";
+    };
 };
 
 exports: {
-    'url_details': imports.module.Manager._url_details;
+    'resolve_route': imports.module.Manager.resolve_route;
+    'get_allow_path': policies.GET_ALLOW_PATH.condition;
+    'get_allow_all': policies.GET_ALLOW_ALL.condition;
+    'post_allow_all': policies.POST_ALLOW_ALL.condition;
 };
 
-type:scheme := {
-    "action": {
-        "type": "string";
-        "default": "unknown";
-    };
-    "inputs": {
-        "type": "list";
-        "default": [];
-    };
-    "outputs": {
-        "type": "list";
-        "default": [];
-        "convert": list;
-    };
-    "errors": {
-        "type": "list";
-        "default": [];
-    };
-    "success": {
-        "type": "boolean";
-        "default": false;
-    };
-    "time": {
-        "type": "string";
-        "default": "0";
-    };
-    "worker": {
-        "type": "string";
-        "default": "unknown";
+any:route_pattern := imports.regex.compile("^/users/(?P<id>[^/]+)$");
+dict:routes := {
+    "users": {
+        "GET": {
+            "pattern": route_pattern;
+            "metadata": {"view": "user"};
+        };
     };
 };
-
-function:success_function := (str:y){x:y;}(str:x);
 
 tuple:test_suite := (
     {
-        "action": exports.url_details;
-        "inputs": "https://example.test/users/42?tag=one&tag=two#section=profile";
-        "outputs": token_print;
-        "assert": @received.1.protocol == "https" & @received.1.path == ["users", "42"] & @received.1.query.tag == ["one", "two"] & @received.1.fragment.section == "profile";
-        "note": "URL details normalizza path, query multipla e fragment";
+        "action": exports.resolve_route;
+        "inputs": (none, routes, "https://example.test/users/42?tag=one&tag=two#section=profile", "GET");
+        "outputs": "user";
+        "assert": @received.metadata.view == @expected & @received.params.id == "42" & @received.url_details.protocol == "https" & @received.url_details.query.tag == ["one", "two"] & @received.url_details.fragment.section == "profile";
+        "note": "resolve_route trova una rotta GET ed estrae parametro, query e fragment";
     },
-    /*{
-        "action": exports.serial;
-        "inputs":((pass,[1],{}),(pass,[2],{}));
-        "outputs": [(1),(3)];
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "serial";
+    {
+        "action": exports.resolve_route;
+        "inputs": (none, routes, "/users/42", "POST");
+        "outputs": none;
+        "assert": @received == @expected;
+        "note": "resolve_route rifiuta un metodo non dichiarato per la rotta";
     },
-    { 
-        "action": exports.parallel; 
-        "inputs":((pass,[1],{}),(pass,[2],{})); 
-        "outputs": [(1), (2)]; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "parallel"; 
+    {
+        "action": exports.resolve_route;
+        "inputs": (none, routes, "/missing", "GET");
+        "outputs": none;
+        "assert": @received == @expected;
+        "note": "resolve_route ritorna null quando il path non corrisponde";
     },
-    { 
-        "action": exports.pipeline; 
-        "inputs":((pass,["ciao"],{}),(pass,[1],{}));
-        "outputs": [("ciao"),(1)]; 
-        "assert": @received.outputs == @expected & @received.success == true; 
-        "note": "pipeline"; 
+    {
+        "action": exports.get_allow_all;
+        "inputs": {"resource": "/login"; "action": "GET";};
+        "outputs": true;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_ALL consente una richiesta GET";
     },
-    { 
-        "action": exports.pipeline; 
-        "inputs":((error_function,["ciao"],{}),(pass,[1],{}));
-        "outputs": None;
-        "assert": @received.outputs == @expected & @received.success == false; 
-        "note": "pipeline"; 
+    {
+        "action": exports.post_allow_all;
+        "inputs": {"resource": "/login"; "action": "POST";};
+        "outputs": true;
+        "assert": @received == @expected;
+        "note": "POST_ALLOW_ALL consente una richiesta POST";
     },
-    { 
-        "action": exports.pipeline; 
-        "inputs":((pass,[1],{}),(error_function,["ciao"],{}));
-        "outputs": None;
-        "assert": @received.outputs == @expected & @received.success == false; 
-        "note": "pipeline"; 
+    {
+        "action": exports.get_allow_path;
+        "inputs": {"resource": "application/view/page/auth/login.xml"; "action": "GET";};
+        "outputs": true;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_PATH consente la risorsa presente nel ruolo guest";
     },
-    { 
-        "action": exports.switch;
-        "inputs":({
-            True:(pass,["ciao"],{});
-            @case !=1:(pass,[111],{});
-        },{'case':1});
-        "outputs": ("ciao");
-        "assert": @received.outputs == @expected & @received.success == true; 
-        "note": "switch";
+    {
+        "action": exports.get_allow_path;
+        "inputs": {"resource": "/profile"; "action": "GET";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_PATH nega una risorsa assente dal ruolo guest";
     },
-    { 
-        "action": exports.switch;
-        "inputs":({True:(pass,["ciao"],{});@case==1:(pass,[123],{});},{'case':1});
-        "outputs": token_print; 
-        "assert": @received.outputs == @expected & @received.success == true; 
-        "note": "switch"; 
+    {
+        "action": exports.get_allow_all;
+        "inputs": {"resource": "/home"; "action": "POST";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_ALL nega una richiesta non GET";
     },
-    { 
-        "action": exports.foreach; 
-        "inputs":([1,2],(pass,[3],{})); 
-        "outputs": [(1, 3), (2, 3)]; 
-        "assert": @received.outputs == @expected & @received.success == true; 
-        "note": "foreach"; 
+    {
+        "action": exports.get_allow_all;
+        "inputs": {"resource": "/admin"; "action": "GET";};
+        "outputs": true;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_ALL consente GET anche su una risorsa diversa da login";
     },
-    { 
-        "action": exports.foreach;
-        "inputs":((1,2),(pass,(3),{})); 
-        "outputs": [(1, 3), (2, 3)]; 
-        "assert": @received.outputs == @expected & @received.success == true; 
-        "note": "foreach"; 
+    {
+        "action": exports.post_allow_all;
+        "inputs": {"resource": "/login"; "action": "GET";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "POST_ALLOW_ALL nega una richiesta GET";
     },
-    { 
-        "action": exports.catch; 
-        "inputs":((error_function,[10],{}),(pass,[123],{})); 
-        "outputs": token_print; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "catch"; 
+    {
+        "action": exports.get_allow_path;
+        "inputs": {"resource": "application/view/page/auth/login.xml"; "action": "POST";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_PATH nega la risorsa guest quando il metodo non è GET";
     },
-    { 
-        "action": exports.pass;
-        "inputs":(10); 
-        "outputs": 10; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "Pass flow"; 
+    {
+        "action": exports.get_allow_path;
+        "inputs": {"resource": "application/view/page/auth/signup.xml"; "action": "GET";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_PATH nega una vista non presente nelle risorse guest";
     },
-    { 
-        "action": exports.guard;
-        "inputs":(1==1); 
-        "outputs": true; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "guard true";
+    {
+        "action": exports.get_allow_all;
+        "inputs": {"resource": "/login"; "action": "get";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "GET_ALLOW_ALL richiede il metodo GET in maiuscolo";
     },
-    { 
-        "action": exports.guard;
-        "inputs":(1 != 1);
-        "outputs": false; 
-        "assert": @received.outputs == @expected & @received.success == false;
-        "note": "guard false";
-    },
-    { 
-        "action": exports.when;
-        "inputs":(@numero != 10,(pass,[123],{}),{numero:10});
-        "outputs": None;
-        "assert": @received.outputs == @expected & @received.success == false;
-        "note": "when false";
-    },
-    { 
-        "action": exports.when;
-        "inputs":(1 == 1,(pass,[123],{}),{inputs:["test"]}); 
-        "outputs": token_print; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "when true";
-    },
-    { 
-        "action": exports.assert;
-        "inputs":(10 >= 50);
-        "outputs": None;
-        "assert": @received.outputs == @expected & @received.success == false;
-        "note": "assert false";
-    },
-    { 
-        "action": exports.assert;
-        "inputs":(10 <= 50); 
-        "outputs": true; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "assert true";
-    },
-    { 
-        "action": exports.assert;
-        "inputs":(@numero <= 50, {numero:60});
-        "outputs": None;
-        "assert": @received.outputs == @expected & @received.success == false;
-        "note": "assert false + context"; 
-    },
-    { 
-        "action": exports.assert;
-        "inputs":(@numero <= 50, {numero:50});
-        "outputs": true; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "assert true + context";
-    },
-    { 
-        "action": exports.pass;
-        "inputs":(10); 
-        "outputs": 10; 
-        "assert": @received.outputs == @expected & @received.success == true;
-        "note": "pass";
-    },*/
+    {
+        "action": exports.post_allow_all;
+        "inputs": {"resource": ""; "action": "";};
+        "outputs": false;
+        "assert": @received == @expected;
+        "note": "POST_ALLOW_ALL nega input privi di metodo e risorsa";
+    }
 );
