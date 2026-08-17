@@ -95,12 +95,6 @@ policies: {
         condition: @action == "POST";
     };
 }
-    
-
-requirement:REQUIRES := {
-
-}
-
 
 rules : {
     "/": [policies.GET_ALLOW_ALL];
