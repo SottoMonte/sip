@@ -103,7 +103,7 @@ Il tutto orchestrato da un unico file di configurazione dichiarativa (`pyproject
 
 ### 1. Clona la repository
 ```bash
-git clone https://github.com/SottoPoppa/framework.git
+git clone https://github.com/SottoPoppa/template.git
 cd framework
 ```
 

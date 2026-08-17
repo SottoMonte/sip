@@ -3,12 +3,11 @@ from __future__ import annotations
 import argparse
 import asyncio
 import io
-import json
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -19,402 +18,62 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SRC_ROOT = PROJECT_ROOT / "src"
-FRAMEWORK_ROOT = SRC_ROOT / "framework"
-INFRASTRUCTURE_ROOT = SRC_ROOT / "infrastructure"
-PYPROJECT = PROJECT_ROOT / "pyproject.toml"
+# ============================================================
+# PATHS
+# ============================================================
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+PYPROJECT = ROOT / "pyproject.toml"
+
+sys.path.insert(0, str(SRC))
 
 
-FRAMEWORK_CONFIG_SECTION = ("tool", "sottopoppa", "framework")
+# ============================================================
+# CONFIGURATION
+# ============================================================
 
-MANAGED_DIRECTORIES = (
-    FRAMEWORK_ROOT,
-    INFRASTRUCTURE_ROOT,
-)
+def load_config() -> dict:
+    """
+    Legge la configurazione del progetto da pyproject.toml.
+    """
 
-
-def print_header():
-    print()
-    print("=" * 60)
-    print(" SottoPoppa Framework")
-    print("=" * 60)
-    print()
+    with PYPROJECT.open("rb") as file:
+        return tomllib.load(file)
 
 
-def load_pyproject() -> dict:
-    if not PYPROJECT.exists():
-        raise RuntimeError(
-            f"pyproject.toml non trovato: {PYPROJECT}"
-        )
+def framework_config() -> dict:
+    """
+    Restituisce la configurazione del framework.
 
-    try:
-        return tomllib.loads(
-            PYPROJECT.read_text(encoding="utf-8")
-        )
-    except Exception as exc:
-        raise RuntimeError(
-            f"Impossibile leggere pyproject.toml: {exc}"
-        ) from exc
+    Esempio:
 
+        [tool.framework]
+        repository = "https://github.com/SottoPoppa/framework"
+        version = "main"
+    """
 
-def get_framework_config() -> dict:
-    config = load_pyproject()
+    config = load_config()
 
     try:
-        framework = (
-            config["tool"]
-            ["sottopoppa"]
-            ["framework"]
-        )
+        return config["tool"]["framework"]
+
     except KeyError as exc:
         raise RuntimeError(
-            "Configurazione framework mancante in pyproject.toml.\n\n"
-            "Aggiungi:\n\n"
-            "[tool.sottopoppa.framework]\n"
-            'repository = "https://github.com/SottoPoppa/framework"\n'
-            'version = "main"'
-        ) from exc
-
-    repository = framework.get("repository")
-    version = framework.get("version")
-
-    if not repository:
-        raise RuntimeError(
-            "tool.sottopoppa.framework.repository non configurato."
-        )
-
-    if not version:
-        raise RuntimeError(
-            "tool.sottopoppa.framework.version non configurato."
-        )
-
-    return {
-        "repository": repository.rstrip("/"),
-        "version": str(version),
-    }
-
-
-def normalize_repository_url(repository: str) -> str:
-    repository = repository.rstrip("/")
-
-    if repository.endswith(".git"):
-        repository = repository[:-4]
-
-    return repository
-
-
-def framework_archive_url(
-    repository: str,
-    version: str,
-) -> str:
-    repository = normalize_repository_url(repository)
-
-    if version in ("main", "master"):
-        return (
-            f"{repository}/archive/refs/heads/"
-            f"{version}.zip"
-        )
-
-    return (
-        f"{repository}/archive/refs/tags/"
-        f"{version}.zip"
-    )
-
-
-def download_framework(
-    repository: str,
-    version: str,
-) -> bytes:
-    url = framework_archive_url(
-        repository,
-        version,
-    )
-
-    print(f"[*] Download framework")
-    print(f"    Repository : {repository}")
-    print(f"    Version    : {version}")
-    print(f"    URL        : {url}")
-    print()
-
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "SottoPoppa-Framework",
-            "Accept": "application/zip",
-        },
-    )
-
-    try:
-        with urllib.request.urlopen(
-            request,
-            timeout=60,
-        ) as response:
-            return response.read()
-
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            raise RuntimeError(
-                f"Framework '{version}' non trovato.\n"
-                f"Controlla branch/tag nella repository:\n"
-                f"{repository}"
-            ) from exc
-
-        raise RuntimeError(
-            f"Errore HTTP durante il download del framework: "
-            f"{exc.code}"
-        ) from exc
-
-    except urllib.error.URLError as exc:
-        raise RuntimeError(
-            f"Impossibile raggiungere la repository del framework: "
-            f"{exc.reason}"
+            "Configurazione [tool.framework] "
+            "non trovata in pyproject.toml."
         ) from exc
 
 
-def safe_extract_zip(
-    archive_data: bytes,
-    destination: Path,
-) -> Path:
-    temporary_root = Path(
-        tempfile.mkdtemp(
-            prefix="sottopoppa-framework-"
-        )
-    )
-
-    archive_path = temporary_root / "framework.zip"
-
-    try:
-        archive_path.write_bytes(archive_data)
-
-        with zipfile.ZipFile(
-            archive_path,
-            "r",
-        ) as archive:
-
-            members = archive.namelist()
-
-            if not members:
-                raise RuntimeError(
-                    "L'archivio del framework è vuoto."
-                )
-
-            for member in members:
-                member_path = Path(member)
-
-                if member_path.is_absolute():
-                    raise RuntimeError(
-                        f"Archivio non sicuro: {member}"
-                    )
-
-                target = (
-                    temporary_root
-                    / member_path
-                ).resolve()
-
-                if (
-                    temporary_root.resolve()
-                    not in target.parents
-                    and target != temporary_root.resolve()
-                ):
-                    raise RuntimeError(
-                        f"Archivio non sicuro: {member}"
-                    )
-
-            archive.extractall(
-                temporary_root
-            )
-
-        directories = [
-            path
-            for path in temporary_root.iterdir()
-            if path.is_dir()
-        ]
-
-        if len(directories) != 1:
-            raise RuntimeError(
-                "Formato archivio framework non riconosciuto."
-            )
-
-        return directories[0]
-
-    except Exception:
-        shutil.rmtree(
-            temporary_root,
-            ignore_errors=True,
-        )
-        raise
-
-
-def find_framework_source(
-    extracted_root: Path,
-) -> Path:
-    src = extracted_root / "src"
-
-    if not src.is_dir():
-        raise RuntimeError(
-            "La repository del framework non contiene "
-            "la directory src/."
-        )
-
-    framework = src / "framework"
-    infrastructure = src / "infrastructure"
-
-    if not framework.is_dir():
-        raise RuntimeError(
-            "La repository del framework non contiene "
-            "src/framework/."
-        )
-
-    if not infrastructure.is_dir():
-        raise RuntimeError(
-            "La repository del framework non contiene "
-            "src/infrastructure/."
-        )
-
-    return extracted_root
-
-
-def replace_managed_directory(
-    source: Path,
-    destination: Path,
-):
-    if destination.exists():
-        shutil.rmtree(destination)
-
-    destination.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    shutil.copytree(
-        source,
-        destination,
-    )
-
-
-def install_framework(
-    repository: str,
-    version: str,
-):
-    print_header()
-
-    archive_data = download_framework(
-        repository,
-        version,
-    )
-
-    extracted_root = None
-
-    try:
-        extracted_root = safe_extract_zip(
-            archive_data,
-            PROJECT_ROOT,
-        )
-
-        find_framework_source(
-            extracted_root
-        )
-
-        source_src = extracted_root / "src"
-
-        print("[*] Installazione framework...")
-
-        replace_managed_directory(
-            source_src / "framework",
-            FRAMEWORK_ROOT,
-        )
-
-        replace_managed_directory(
-            source_src / "infrastructure",
-            INFRASTRUCTURE_ROOT,
-        )
-
-        print(
-            "[✓] src/framework/ aggiornato."
-        )
-
-        print(
-            "[✓] src/infrastructure/ aggiornato."
-        )
-
-    finally:
-        if extracted_root is not None:
-            shutil.rmtree(
-                extracted_root,
-                ignore_errors=True,
-            )
-
-        parent = (
-            extracted_root.parent
-            if extracted_root
-            else None
-        )
-
-        if parent and parent.exists():
-            shutil.rmtree(
-                parent,
-                ignore_errors=True,
-            )
-
-    print()
-    print("[✓] Framework installato.")
-    print()
-
-
-def framework_installed() -> bool:
-    return (
-        FRAMEWORK_ROOT.is_dir()
-        and (
-            FRAMEWORK_ROOT
-            / "manager"
-            / "loader.py"
-        ).is_file()
-        and INFRASTRUCTURE_ROOT.is_dir()
-    )
-
-
-def run_setup():
-    if framework_installed():
-        print(
-            "[!] Framework già presente."
-        )
-        print(
-            "    Usa --update per aggiornarlo."
-        )
-        return True
-
-    config = get_framework_config()
-
-    install_framework(
-        config["repository"],
-        config["version"],
-    )
-
-    return True
-
-
-def run_update():
-    config = get_framework_config()
-
-    if not framework_installed():
-        print(
-            "[*] Framework non installato."
-        )
-        print(
-            "[*] Eseguo automaticamente il setup..."
-        )
-        print()
-
-    install_framework(
-        config["repository"],
-        config["version"],
-    )
-
-    return True
-
+# ============================================================
+# DEPENDENCIES
+# ============================================================
 
 def setup_core_dependencies():
+    """
+    Installa il progetto in editable mode.
+    """
+
     subprocess.run(
         [
             sys.executable,
@@ -422,84 +81,294 @@ def setup_core_dependencies():
             "pip",
             "install",
             "-e",
-            str(PROJECT_ROOT),
+            str(ROOT),
         ],
         check=True,
     )
 
 
-async def run_framework(config: dict):
+# ============================================================
+# FRAMEWORK DOWNLOAD
+# ============================================================
+
+def framework_url() -> str:
+    """
+    Costruisce l'URL dell'archivio GitHub del framework.
+    """
+
+    config = framework_config()
+
+    repository = config["repository"].rstrip("/")
+    version = str(config["version"])
+
+    if version in ("main", "master"):
+        reference = f"heads/{version}"
+    else:
+        reference = f"tags/{version}"
+
+    return (
+        f"{repository}/archive/refs/"
+        f"{reference}.zip"
+    )
+
+
+def download_framework() -> bytes:
+    """
+    Scarica l'archivio del framework.
+    """
+
+    config = framework_config()
+
+    print(
+        f"[*] Download framework "
+        f"{config['version']}..."
+    )
+
+    request = urllib.request.Request(
+        framework_url(),
+        headers={
+            "User-Agent": "SottoPoppa-Framework",
+        },
+    )
+
+    with urllib.request.urlopen(
+        request,
+        timeout=60,
+    ) as response:
+        return response.read()
+
+
+# ============================================================
+# FRAMEWORK INSTALL / UPDATE
+# ============================================================
+
+def install_framework():
+    """
+    Installa o aggiorna:
+
+        src/framework/
+        src/infrastructure/
+
+    Non modifica:
+
+        src/application/
+        public/
+        pyproject.toml
+    """
+
+    archive = download_framework()
+
+    with tempfile.TemporaryDirectory() as temp:
+
+        temp_path = Path(temp)
+
+        with zipfile.ZipFile(
+            io.BytesIO(archive)
+        ) as zip_file:
+
+            zip_file.extractall(temp_path)
+
+        roots = [
+            path
+            for path in temp_path.iterdir()
+            if path.is_dir()
+        ]
+
+        if len(roots) != 1:
+            raise RuntimeError(
+                "Archivio del framework non valido."
+            )
+
+        framework_root = roots[0]
+        source = framework_root / "src"
+
+        if not (
+            source / "framework"
+        ).is_dir():
+            raise RuntimeError(
+                "Il framework non contiene "
+                "src/framework/."
+            )
+
+        if not (
+            source / "infrastructure"
+        ).is_dir():
+            raise RuntimeError(
+                "Il framework non contiene "
+                "src/infrastructure/."
+            )
+
+        SRC.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        for name in (
+            "framework",
+            "infrastructure",
+        ):
+            source_dir = source / name
+            target_dir = SRC / name
+
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
+
+            shutil.copytree(
+                source_dir,
+                target_dir,
+            )
+
+            print(
+                f"[✓] src/{name}/ aggiornato."
+            )
+
+    print(
+        "[✓] Framework pronto."
+    )
+
+
+# ============================================================
+# FRAMEWORK
+# ============================================================
+
+def framework_installed() -> bool:
+    """
+    Controlla se il framework è presente.
+    """
+
+    return (
+        SRC / "framework"
+        / "manager"
+        / "loader.py"
+    ).is_file()
+
+
+def get_loader():
+    """
+    Importa e restituisce il Loader.
+    """
+
     if not framework_installed():
-        print(
-            "[!] Framework non installato."
-        )
-        print(
-            "[*] Esegui:"
-        )
-        print()
-        print(
+        raise RuntimeError(
+            "Framework non installato.\n\n"
+            "Esegui:\n\n"
             "    python public/main.py --setup"
         )
-        print()
-        return False
-
-    sys.path.insert(
-        0,
-        str(SRC_ROOT),
-    )
 
     from framework.manager.loader import Loader
 
-    loader = Loader()
+    return Loader()
+
+
+# ============================================================
+# APPLICATION
+# ============================================================
+
+async def run_framework(config: dict):
+
+    loader_instance = get_loader()
+
+    # --------------------------------------------------------
+    # INSTALL
+    # --------------------------------------------------------
 
     if config.get("install"):
-        return await loader.install(config)
+        await loader_instance.install(config)
+        return
+
+    # --------------------------------------------------------
+    # VERIFY
+    # --------------------------------------------------------
 
     if config.get("verify"):
-        return await loader.verify_contracts(
+        return await loader_instance.verify_contracts(
             config
         )
 
-    app = await loader.bootstrap(
+    # --------------------------------------------------------
+    # BOOTSTRAP
+    # --------------------------------------------------------
+
+    app = await loader_instance.bootstrap(
         config
     )
 
     try:
+
+        # ----------------------------------------------------
+        # TEST
+        # ----------------------------------------------------
+
         if config.get("test") is not None:
-            return await loader.run_tests(
+            return await loader_instance.run_tests(
                 config.get("test")
             )
 
+        # ----------------------------------------------------
+        # APPLICATION
+        # ----------------------------------------------------
+
         await app.startup()
 
-    except Exception as exc:
+    except Exception as e:
+
         print(
-            f"[!] Errore critico: {exc}"
+            f"[!] Errore critico: {e}"
         )
+
         return False
 
     finally:
+
         await app.shutdown()
 
-    return True
 
+# ============================================================
+# COMMANDS
+# ============================================================
 
 async def main(config: dict):
+
+    # --------------------------------------------------------
+    # SETUP
+    # --------------------------------------------------------
+
     if config.get("setup"):
-        return run_setup()
+
+        setup_core_dependencies()
+
+        install_framework()
+
+        return
+
+    # --------------------------------------------------------
+    # UPDATE
+    # --------------------------------------------------------
 
     if config.get("update"):
-        return run_update()
+
+        install_framework()
+
+        return
+
+    # --------------------------------------------------------
+    # NORMAL FRAMEWORK EXECUTION
+    # --------------------------------------------------------
 
     return await run_framework(
         config
     )
 
 
-def build_parser():
+# ============================================================
+# CLI
+# ============================================================
+
+def parser() -> argparse.ArgumentParser:
+
     parser = argparse.ArgumentParser(
         description=(
-            "SottoPoppa Framework"
+            "Avvia SottoPoppa Framework."
         )
     )
 
@@ -514,32 +383,15 @@ def build_parser():
     )
 
     parser.add_argument(
-        "--setup",
-        action="store_true",
-        help=(
-            "Scarica e installa il framework."
-        ),
-    )
-
-    parser.add_argument(
-        "--update",
-        action="store_true",
-        help=(
-            "Aggiorna framework e infrastructure "
-            "dal repository configurato."
-        ),
-    )
-
-    parser.add_argument(
         "--debug",
         action="store_true",
-        help="Abilita la modalità debug.",
+        help="Abilita la modalità debug",
     )
 
     parser.add_argument(
         "--dev",
         action="store_true",
-        help="Abilita la modalità dev.",
+        help="Abilita la modalità dev",
     )
 
     parser.add_argument(
@@ -547,7 +399,7 @@ def build_parser():
         action="store_true",
         help=(
             "Installa le dipendenze "
-            "dichiarate dal framework."
+            "del framework"
         ),
     )
 
@@ -555,8 +407,8 @@ def build_parser():
         "--verify",
         action="store_true",
         help=(
-            "Verifica i contract senza "
-            "avviare l'applicazione."
+            "Verifica i contract in modalità "
+            "strict senza avviare l'applicazione"
         ),
     )
 
@@ -573,22 +425,44 @@ def build_parser():
     )
 
     parser.add_argument(
+        "--setup",
+        action="store_true",
+        help=(
+            "Prepara l'ambiente e installa "
+            "il framework"
+        ),
+    )
+
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help=(
+            "Aggiorna framework e infrastructure"
+        ),
+    )
+
+    parser.add_argument(
         "--skip-verify",
         action="store_true",
         help=(
             "Bypassa il controllo "
-            "'codice testato'."
+            "'codice testato' degli adapter"
         ),
     )
 
     return parser
 
 
+# ============================================================
+# ENTRY POINT
+# ============================================================
+
 if __name__ == "__main__":
-    parser = build_parser()
-    args = parser.parse_args()
+
+    args = parser().parse_args()
 
     try:
+
         result = asyncio.run(
             main(vars(args))
         )
@@ -597,15 +471,17 @@ if __name__ == "__main__":
             sys.exit(1)
 
     except KeyboardInterrupt:
-        print()
-        print("[!] Operazione interrotta.")
+
+        print(
+            "\n[!] Operazione interrotta."
+        )
 
         sys.exit(130)
 
     except Exception as exc:
-        print()
+
         print(
-            f"[!] {exc}"
+            f"\n[!] {exc}"
         )
 
         sys.exit(1)

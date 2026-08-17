@@ -1,42 +1,73 @@
 [project]
-name = "cloud.colosso"
+name = "com.example" # Reverse domain name notation example: from example.com to com.example
 version = "0.1.0"
-description = "Un'app di esempio con OmniPort"  
+description = "Your project description"
 readme = "README.md"
+
 dependencies = [
     "jinja2",
     "tomli; python_version < '3.11'",
 ]
 
-[tool.sottopoppa.framework]
+
+# ============================================================
+# FRAMEWORK
+# ============================================================
+
+[tool.framework]
 repository = "https://github.com/SottoPoppa/framework"
 version = "main"
+
+
+# ============================================================
+# MANAGERS
+# ============================================================
 
 [manager.defender]
 soglia_tentativi = 5
 timeout_blocchi = 3600
 presentation = "demo.dsl"
-#persistence = "redis.toml"
-#message = "log.toml"
+
+# persistence = "redis.toml"
+# message = "log.toml"
+
 
 [manager.messenger]
 debug_mode = true
 
-#[[message.console]]
-#persistence = "log"
-#name = "console"
+
+# ============================================================
+# MESSAGE
+# ============================================================
+
+# [[message.console]]
+# persistence = "log"
+# name = "console"
+
 
 [[message.bus]]
 name = "broker"
 
-#[[presentation.console]]
-#name = "tui"
+
+# ============================================================
+# PRESENTATION
+# ============================================================
+
+# [[presentation.console]]
+# name = "tui"
+
+
+# ============================================================
+# PERSISTENCE
+# ============================================================
 
 [[persistence.filesystem]]
 name = "log"
 
+
 [[persistence.filesystem]]
 name = "workfolder"
+
 
 [[persistence.filesystem]]
 name = "source"
@@ -44,8 +75,13 @@ path = "src/"
 watch = true
 message = "broker"
 
-#[[network.neural]]
-#name = "decoder"
-#input = 40
-#hidden = 2048
-#output = 2048
+
+# ============================================================
+# NETWORK
+# ============================================================
+
+# [[network.neural]]
+# name = "decoder"
+# input = 40
+# hidden = 2048
+# output = 2048
