@@ -6,7 +6,8 @@
 
 #framework
 .diagnostics/
-src/
+src/framework
+src/infrastructure
 
 
 # Byte-compiled / optimized / DLL files
