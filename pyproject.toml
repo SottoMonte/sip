@@ -8,6 +8,10 @@ dependencies = [
     "tomli; python_version < '3.11'",
 ]
 
+[tool.sottopoppa.framework]
+repository = "https://github.com/SottoPoppa/framework"
+version = "main"
+
 [manager.defender]
 soglia_tentativi = 5
 timeout_blocchi = 3600

@@ -1,9 +1,0 @@
-{
-  "requires": [
-    "htpy",
-    "starlette",
-    "uvicorn",
-    "beautifulsoup4",
-    "paramiko"
-  ]
-}
