@@ -1,5 +1,6 @@
 {% extends "Layout.xml" %}
 {% block title %}Ordine confermato - SIP Italia{% endblock %}
+{% block breadcrumb_label %}Ordine confermato{% endblock %}
 {% block content %}
 <Column padding="90px,12%" spacing="18px" align="center"><Icon name="bi-check-circle-fill" size="58px" color="#16805c" /><Text type="h1" size="38px" font="black" color="#12609b">Grazie per il tuo ordine!</Text><Text color="#64748b" align="center">Abbiamo ricevuto il tuo ordine #SIP-10025. Riceverai la conferma all’indirizzo email indicato.</Text><Action type="link" route="/shop" background="#12609b" radius="small" padding="14px,22px"><Text color="#ffffff" font="bold">Torna allo shop</Text></Action></Column>
 {% endblock %}

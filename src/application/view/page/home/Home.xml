@@ -1,7 +1,12 @@
 {% extends "Layout.xml" %}
 {% block title %}SIP Italia - Bilance e attrezzature professionali{% endblock %}
+{% block breadcrumb %}{% endblock %}
 {% block content %}
-<Column width="full" padding="48px,9%" background="#ffffff" spacing="42px">
+<Column width="full" background="#ffffff" spacing="42px">
+    <Row width="full" padding="58px,9%" background="#eaf4fb" align="center" justify="between" spacing="30px" class="flex-col md:flex-row">
+        <Column spacing="14px" class="md:w-3/5"><Text color="#68a7dd" font="bold" uppercase="true" size="13px">SIP ITALIA · SOLUZIONI PROFESSIONALI</Text><Text type="h1" size="42px" font="black" color="#12609b">Tecnologia che fa crescere il tuo punto vendita.</Text><Text color="#64748b" size="17px">Bilance, casse, software e assistenza per lavorare meglio ogni giorno.</Text><Row spacing="12px"><Action type="link" route="/shop/catalogo" background="#12609b" radius="small" padding="14px,20px"><Text color="#ffffff" font="bold">Esplora il catalogo</Text></Action><Action type="link" route="/contatti" border="1px,solid,#68a7dd" radius="small" padding="14px,20px"><Text color="#12609b" font="bold">Parla con noi</Text></Action></Row></Column><Column align="center" justify="center" background="#ffffff" radius="full" width="220px" height="220px" class="shadow-lg"><Icon name="bi-gear-wide-connected" size="82px" color="#68a7dd" /><Text color="#12609b" font="black" size="18px">SIP Italia</Text></Column>
+    </Row>
+    <Column width="full" padding="0,9%,48px" background="#ffffff" spacing="42px">
     <Column spacing="8px"><Text type="h1" size="29px" font="black" color="#737373">Bilance</Text><Divider thickness="3px" width="55px" background="#68a7dd" /></Column>
     <Grid width="full" spacing="10px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
         {% set sip_products = [
@@ -13,6 +18,7 @@
         {% for image, name in sip_products %}<ProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}
     </Grid>
     <Column spacing="8px"><Text type="h2" size="29px" font="black" color="#737373">Casse</Text><Divider thickness="3px" width="55px" background="#68a7dd" /></Column>
-    <Row padding="25px" background="#f1f7fc" radius="medium" justify="between" align="center"><Column spacing="8px"><Text size="24px" font="black" color="#12609b">Tutto il necessario per il tuo punto vendita</Text><Text color="#64748b">Scopri casse, software, accessori e assistenza professionale.</Text></Column><Action type="link" route="/shop" background="#12609b" radius="small" padding="12px,22px"><Text color="#ffffff" font="bold">VAI ALLO SHOP</Text></Action></Row>
+    <Row padding="28px" background="#f1f7fc" radius="medium" justify="between" align="center" class="flex-col md:flex-row" spacing="18px"><Column spacing="8px"><Text size="24px" font="black" color="#12609b">Tutto il necessario per il tuo punto vendita</Text><Text color="#64748b">Scopri casse, software, accessori e assistenza professionale.</Text></Column><Action type="link" route="/shop/catalogo" background="#12609b" radius="small" padding="12px,22px"><Text color="#ffffff" font="bold">VAI AL CATALOGO</Text></Action></Row>
+    </Column>
 </Column>
 {% endblock %}

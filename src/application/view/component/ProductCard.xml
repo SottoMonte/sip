@@ -1,4 +1,4 @@
-<Column background="#ffffff" radius="medium" border="1px,solid,#e7e7e7" shadow="small" overflow="hidden">
+<Column background="#ffffff" radius="medium" border="1px,solid,#e2e8f0" shadow="small" overflow="hidden" class="transition hover:-translate-y-1 hover:shadow-lg">
     <Media type="image" width="100%" height="245px" src="https://d7ixxfssdn40o.cloudfront.net/6a60b8857996b/files/shop/originali/{{ component.attributes.image }}" />
-    <Column padding="12px,15px" spacing="12px"><Text align="center" color="#68a7dd" font="bold" size="14px">{{ component.attributes.name }}</Text><Action type="link" route="/shop/bilance" background="#68a7dd" radius="small" padding="8px,12px" align="center"><Text color="#ffffff" font="bold" size="13px"><Icon name="bi-cart3" /> Acquista</Text></Action></Column>
+    <Column padding="18px" spacing="12px"><Text color="#12609b" font="bold" size="16px">{{ component.attributes.name }}</Text><Text color="#64748b" size="13px">Soluzione professionale SIP Italia</Text><Row align="center" justify="between"><Text color="#16805c" font="bold" size="12px"><Icon name="bi-check-circle" /> Disponibile</Text><Action type="link" route="/shop/catalogo" background="#12609b" radius="small" padding="9px,13px"><Text color="#ffffff" font="bold" size="12px"><Icon name="bi-arrow-right" /> Scopri</Text></Action></Row></Column>
 </Column>

@@ -1,5 +1,7 @@
-<Column width="280px" padding="22px" background="#ffffff" radius="medium" border="1px,solid,#e5eaf0" spacing="18px" class="shrink-0">
-    <Text color="#172033" font="black" size="18px">Marche</Text>
+<Column width="280px" padding="24px" background="#ffffff" radius="medium" border="1px,solid,#e2e8f0" spacing="18px" class="shrink-0 shadow-sm">
+    <Text color="#12609b" font="black" size="20px">Filtra il catalogo</Text>
+    <Text color="#64748b" size="13px">Trova rapidamente la soluzione giusta.</Text>
+    <Text color="#172033" font="black" size="16px">Marche</Text>
     <Divider thickness="2px" width="80px" background="#12609b" />
     <Column spacing="0px">
         <Action type="link" route="/shop/bilance" padding="10px,0"><Text color="#68a7dd">Helmac</Text></Action>
@@ -7,7 +9,7 @@
         <Action type="link" route="/shop/software" padding="10px,0"><Text color="#68a7dd">Rch</Text></Action>
         <Action type="link" route="/shop/accessori" padding="10px,0"><Text color="#68a7dd">Smeg</Text></Action>
     </Column>
-    <Column padding="15px" background="#f5f9fc" radius="small" spacing="10px">
+    <Column padding="15px" background="#f1f7fc" radius="small" spacing="10px">
         <Text color="#172033" font="bold" size="13px">Cerca nel catalogo</Text>
         <Input type="search" name="q" placeholder="Cerca prodotto..." width="full" background="#ffffff" border="1px,solid,#cbdceb" padding="11px" radius="small" />
     </Column>

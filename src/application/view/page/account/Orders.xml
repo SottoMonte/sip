@@ -1,5 +1,6 @@
 {% extends "Layout.xml" %}
 {% block title %}I miei ordini - SIP Italia{% endblock %}
+{% block breadcrumb_label %}I miei ordini{% endblock %}
 {% block content %}
 <Column padding="75px,12%" spacing="22px"><Text type="h1" size="36px" font="black" color="#12609b">I miei ordini</Text><Column padding="20px" border="1px,solid,#e2e8f0" radius="medium" spacing="12px"><Row justify="between"><Text color="#172033" font="bold">Ordine #SIP-10024</Text><Text color="#16805c" font="bold">In consegna</Text></Row><Text color="#64748b">Bilancia Touch 15 · 20 agosto 2026</Text><Action type="link" route="/account/orders/SIP-10024"><Text color="#12609b" font="bold">Vedi dettagli</Text></Action></Column></Column>
 {% endblock %}

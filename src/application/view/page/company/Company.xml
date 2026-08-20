@@ -1,5 +1,6 @@
 {% extends "Layout.xml" %}
 {% block title %}SIP Italia - Azienda{% endblock %}
+{% block breadcrumb_label %}Azienda{% endblock %}
 {% block content %}
 <Column padding="85px,12%" spacing="22px"><Text color="#68a7dd" font="bold" uppercase="true">Azienda</Text><Text type="h1" size="46px" font="black" color="#12609b">Il partner che conosce il tuo lavoro.</Text><Text size="18px" color="#64748b">Da oltre 35 anni SIP Italia fornisce bilance, attrezzature, sistemi di cassa e soluzioni informatiche alle attività commerciali.</Text><Action type="link" route="/shop" background="#68a7dd" radius="small" padding="13px,22px"><Text color="#ffffff" font="bold">SCOPRI LO SHOP</Text></Action></Column>
 {% endblock %}
