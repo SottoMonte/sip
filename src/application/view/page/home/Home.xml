@@ -5,7 +5,21 @@
     <Row width="full" padding="58px,9%" background="#eaf4fb" align="center" justify="between" spacing="30px" class="flex-col md:flex-row">
         <Column spacing="14px" class="md:w-3/5"><Text color="#68a7dd" font="bold" uppercase="true" size="13px">SIP ITALIA · SOLUZIONI PROFESSIONALI</Text><Text type="h1" size="42px" font="black" color="#12609b">Tecnologia che fa crescere il tuo punto vendita.</Text><Text color="#64748b" size="17px">Bilance, casse, software e assistenza per lavorare meglio ogni giorno.</Text><Row spacing="12px"><Action type="link" route="/shop/catalogo" background="#12609b" radius="small" padding="14px,20px"><Text color="#ffffff" font="bold">Esplora il catalogo</Text></Action><Action type="link" route="/contatti" border="1px,solid,#68a7dd" radius="small" padding="14px,20px"><Text color="#12609b" font="bold">Parla con noi</Text></Action></Row></Column><Column align="center" justify="center" background="#ffffff" radius="full" width="220px" height="220px" class="shadow-lg"><Icon name="bi-gear-wide-connected" size="82px" color="#68a7dd" /><Text color="#12609b" font="black" size="18px">SIP Italia</Text></Column>
     </Row>
+    <Row width="full" padding="25px,9%" justify="between" align="center" spacing="20px" class="flex-col md:flex-row">
+        <Row spacing="12px" align="center"><Icon name="bi-patch-check-fill" size="24px" color="#16805c" /><Column spacing="2px"><Text color="#172033" font="bold">Soluzioni affidabili</Text><Text color="#64748b" size="13px">Tecnologia selezionata per il tuo lavoro</Text></Column></Row>
+        <Row spacing="12px" align="center"><Icon name="bi-tools" size="24px" color="#68a7dd" /><Column spacing="2px"><Text color="#172033" font="bold">Assistenza dedicata</Text><Text color="#64748b" size="13px">Ti seguiamo anche dopo l'acquisto</Text></Column></Row>
+        <Row spacing="12px" align="center"><Icon name="bi-lightning-charge-fill" size="24px" color="#f59e0b" /><Column spacing="2px"><Text color="#172033" font="bold">Risposte rapide</Text><Text color="#64748b" size="13px">Un team pronto ad aiutarti</Text></Column></Row>
+    </Row>
     <Column width="full" padding="0,9%,48px" background="#ffffff" spacing="42px">
+    <Column spacing="12px">
+        <Text type="h2" size="29px" font="black" color="#737373">Trova la soluzione giusta</Text>
+        <Text color="#64748b">Scopri le categorie più richieste per il tuo punto vendita.</Text>
+        <Grid width="full" spacing="18px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <Action type="link" route="/shop/catalogo" padding="24px" background="#f1f7fc" radius="medium"><Icon name="bi-speedometer2" size="34px" color="#12609b" /><Text color="#12609b" font="black" size="19px">Bilance</Text><Text color="#64748b" size="13px">Precisione e velocità al banco.</Text></Action>
+            <Action type="link" route="/shop/catalogo" padding="24px" background="#f8fbfe" radius="medium"><Icon name="bi-shop-window" size="34px" color="#12609b" /><Text color="#12609b" font="black" size="19px">Attrezzature</Text><Text color="#64748b" size="13px">Tutto per organizzare il lavoro.</Text></Action>
+            <Action type="link" route="/shop/catalogo" padding="24px" background="#f1f7fc" radius="medium"><Icon name="bi-grid-1x2" size="34px" color="#12609b" /><Text color="#12609b" font="black" size="19px">Casse e software</Text><Text color="#64748b" size="13px">Gestione semplice e completa.</Text></Action>
+        </Grid>
+    </Column>
     <Column spacing="8px"><Text type="h1" size="29px" font="black" color="#737373">Bilance</Text><Divider thickness="3px" width="55px" background="#68a7dd" /></Column>
     <Grid width="full" spacing="10px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
         {% set sip_products = [
@@ -17,6 +31,10 @@
         {% for image, name in sip_products %}<ProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}
     </Grid>
     <Column spacing="8px"><Text type="h2" size="29px" font="black" color="#737373">Casse</Text><Divider thickness="3px" width="55px" background="#68a7dd" /></Column>
+    <Row width="full" padding="28px" background="#12609b" radius="medium" justify="between" align="center" spacing="18px" class="flex-col md:flex-row">
+        <Column spacing="8px"><Text size="24px" font="black" color="#ffffff">Hai bisogno di una consulenza?</Text><Text color="#d7ecfa">Raccontaci la tua esigenza: ti aiuteremo a scegliere la soluzione più adatta.</Text></Column>
+        <Action type="link" route="/contatti" background="#8bc5f2" radius="small" padding="12px,22px"><Text color="#0b4777" font="bold">CONTATTACI</Text></Action>
+    </Row>
     <Row padding="28px" background="#f1f7fc" radius="medium" justify="between" align="center" class="flex-col md:flex-row" spacing="18px"><Column spacing="8px"><Text size="24px" font="black" color="#12609b">Tutto il necessario per il tuo punto vendita</Text><Text color="#64748b">Scopri casse, software, accessori e assistenza professionale.</Text></Column><Action type="link" route="/shop/catalogo" background="#12609b" radius="small" padding="12px,22px"><Text color="#ffffff" font="bold">VAI AL CATALOGO</Text></Action></Row>
     </Column>
 </Column>

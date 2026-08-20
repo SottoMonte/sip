@@ -14,6 +14,11 @@
         <Row spacing="24px" align="center"><Action type="link" route="/account"><Icon name="bi-person-fill" color="#172033" size="23px" /></Action><Action type="link" route="/shop/cart"><Icon name="bi-cart3" color="#172033" size="23px" /></Action></Row>
     </Row>
     <Row width="full" padding="17px,9%" background="#12609b" align="center" spacing="42px" class="flex-col md:flex-row">
-        <Action type="link" route="/azienda"><Text color="#ffffff" font="bold">Azienda</Text></Action><Action type="link" route="/shop"><Text color="#ffffff" font="bold">Shop</Text></Action><Action type="link" route="/assistenza"><Text color="#ffffff" font="bold">Assistenza</Text></Action><Action type="link" route="/news"><Text color="#ffffff" font="bold">News</Text></Action><Action type="link" route="/contatti"><Text color="#ffffff" font="bold">Contatti</Text></Action><Action type="link" route="https://wa.me/393665391867" class="md:ml-auto"><Text color="#ffffff" font="bold" size="19px"><Icon name="bi-whatsapp" /> Whatsapp</Text></Action>
+        <Action type="link" route="/azienda"><Text color="#ffffff" font="bold">Azienda</Text></Action>
+        <Action type="link" route="/shop"><Text color="#ffffff" font="bold">Shop</Text></Action>
+        <Action type="link" route="/assistenza"><Text color="#ffffff" font="bold">Assistenza</Text></Action>
+        <Action type="link" route="/news"><Text color="#ffffff" font="bold">News</Text></Action>
+        <Action type="link" route="/contatti"><Text color="#ffffff" font="bold">Contatti</Text></Action>
+        <Action type="link" route="https://wa.me/393665391867" class="md:ml-auto"><Text color="#ffffff" font="bold" size="19px"><Icon name="bi-whatsapp" /> Whatsapp</Text></Action>
     </Row>
 </Column>

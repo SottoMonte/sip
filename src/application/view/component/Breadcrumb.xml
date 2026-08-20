@@ -1,5 +1,4 @@
-{% set current_path = url.url | default("/") %}
-{% set segments = current_path.strip("/").split("/") %}
+{% set segments = session.current_url.path | default([]) %}
 {% set labels = {
     "shop": "Shop",
     "catalog": "Catalogo",
@@ -26,7 +25,7 @@
     "contatti": "Contatti"
 } %}
 
-{% if current_path != "/" %}
+{% if segments %}
 <Row width="full" padding="15px,9%" background="#f8fbfe" align="center" spacing="14px" border="1px,solid,#e5edf5">
     <Action type="link" route="/"><Text color="#12609b" font="bold" size="13px"><Icon name="bi-house-door" /> </Text><Text color="#12609b" font="bold" size="13px">Home</Text></Action>
     {% set breadcrumb = namespace(url="") %}
