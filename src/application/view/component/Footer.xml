@@ -1,0 +1,36 @@
+<Column width="full" padding="50px,9%,0" background="#0b4777" spacing="0">
+    <Row width="full" height="4px" background="#68a7dd" />
+    <Row width="full" padding="34px,0,38px" spacing="40px" align="start" class="flex-col md:flex-row">
+        <Column width="full" spacing="12px" class="md:w-2/5">
+            <Text color="#ffffff" font="black" size="25px" spacing="1px">S.I.P <Text color="#8bc5f2">ITALIA</Text></Text>
+            <Text color="#c7e3f8" size="14px" width="min(330px, 100%)">Sistemi informatici professionali per imprese, negozi e attività commerciali.</Text>
+            <Row spacing="10px" margin="5px,0,0,0">
+                <Action type="link" route="mailto:info@sip-italia.com" background="#155b8e" radius="full" padding="9px"><Icon name="bi-envelope-fill" color="#ffffff" /></Action>
+                <Action type="link" route="tel:+393665391867" background="#155b8e" radius="full" padding="9px"><Icon name="bi-telephone-fill" color="#ffffff" /></Action>
+                <Action type="link" route="https://wa.me/393665391867" background="#155b8e" radius="full" padding="9px"><Icon name="bi-whatsapp" color="#ffffff" /></Action>
+            </Row>
+        </Column>
+        <Column width="full" spacing="14px" class="md:w-1/5">
+            <Text color="#ffffff" font="black" size="14px">Esplora</Text>
+            <Action type="link" route="/azienda"><Text color="#c7e3f8" size="13px">Azienda</Text></Action>
+            <Action type="link" route="/shop"><Text color="#c7e3f8" size="13px">Shop prodotti</Text></Action>
+            <Action type="link" route="/news"><Text color="#c7e3f8" size="13px">News</Text></Action>
+        </Column>
+        <Column width="full" spacing="14px" class="md:w-1/5">
+            <Text color="#ffffff" font="black" size="14px">Supporto</Text>
+            <Action type="link" route="/assistenza"><Text color="#c7e3f8" size="13px">Richiedi assistenza</Text></Action>
+            <Action type="link" route="/contatti"><Text color="#c7e3f8" size="13px">Contatti</Text></Action>
+            <Text color="#c7e3f8" size="13px">Lun - Ven · 9:00 - 18:00</Text>
+        </Column>
+        <Column width="full" spacing="14px" class="md:w-1/5">
+            <Text color="#ffffff" font="black" size="14px">Parliamone</Text>
+            <Text color="#c7e3f8" size="13px">info@sip-italia.com</Text>
+            <Text color="#c7e3f8" size="13px">+39 366 539 1867</Text>
+            <Action type="link" route="/contatti" background="#68a7dd" radius="small" padding="10px,14px"><Text color="#0b4777" font="black" size="12px">CONTATTACI</Text></Action>
+        </Column>
+    </Row>
+    <Row width="full" padding="17px,0" border="1px,solid,#2a6794" justify="between" align="center" class="flex-col sm:flex-row">
+        <Text color="#a9d0ed" size="12px">© 2026 SIP Italia · Tutti i diritti riservati</Text>
+        <Text color="#a9d0ed" size="12px">Qualità, assistenza e affidabilità.</Text>
+    </Row>
+</Column>

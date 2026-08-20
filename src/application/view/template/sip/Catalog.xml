@@ -4,4 +4,4 @@
     ("gp4plus_6a76e79598ed9.png", "Bilancia Helmac GP4 PLUS"),
     ("gp-touch-self-icona_6a76e5c35d0c4.png", "Bilancia Helmac GP10/GP15 Self")
 ] %}
-{% for image, name in sip_products %}<SIPProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}
+{% for image, name in sip_products %}<ProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}

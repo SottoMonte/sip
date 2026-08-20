@@ -1,4 +1,4 @@
-{% extends "sip.xml" %}
+{% extends "Layout.xml" %}
 {% block title %}SIP Italia - Assistenza{% endblock %}
 {% block content %}
 <Column padding="75px,12%" spacing="20px"><Text color="#68a7dd" font="bold" uppercase="true">Assistenza</Text><Text type="h1" size="44px" font="black" color="#12609b">Quando hai bisogno, noi ci siamo.</Text><Text size="18px" color="#64748b">Assistenza informatica, manutenzione delle attrezzature e interventi rapidi per non fermare il tuo lavoro.</Text><Action type="link" route="/contatti" background="#68a7dd" radius="small" padding="13px,22px"><Text color="#ffffff" font="bold">RICHIEDI ASSISTENZA</Text></Action></Column>

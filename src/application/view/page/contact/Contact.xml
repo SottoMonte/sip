@@ -1,4 +1,4 @@
-{% extends "sip.xml" %}
+{% extends "Layout.xml" %}
 {% block title %}SIP Italia - Contatti{% endblock %}
 {% block content %}
 <Column padding="75px,12%" spacing="18px"><Text color="#68a7dd" font="bold" uppercase="true">Contatti</Text><Text type="h1" size="44px" font="black" color="#12609b">Parliamo del tuo progetto.</Text><Text size="18px" color="#64748b">Siamo a tua disposizione per informazioni, preventivi e assistenza.</Text><Row spacing="15px" class="flex-col sm:flex-row"><Action type="link" route="mailto:info@sip-italia.com" background="#68a7dd" radius="small" padding="15px,22px"><Text color="#ffffff" font="bold"><Icon name="bi-envelope" /> info@sip-italia.com</Text></Action><Action type="link" route="tel:+393665391867" border="1px,solid,#68a7dd" radius="small" padding="15px,22px"><Text color="#12609b" font="bold"><Icon name="bi-telephone" /> +39 366 539 1867</Text></Action></Row></Column>

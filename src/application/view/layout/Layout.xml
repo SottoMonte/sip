@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window type="page" title="{% block title %}SIP Italia{% endblock %}" background="#ffffff" padding="0" style="min-height:100vh;display:flex;flex-direction:column;">
+    <Header />
+    <Column width="full" min-height="calc(100vh - 180px)" expand="true" background="#ffffff" style="flex:1;">
+        {% block content %}{% endblock %}
+    </Column>
+    <Footer />
+</Window>

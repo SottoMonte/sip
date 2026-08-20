@@ -1,4 +1,4 @@
-{% extends "sip.xml" %}
+{% extends "Layout.xml" %}
 {% block title %}SIP Italia - Bilance e attrezzature professionali{% endblock %}
 {% block content %}
 <Column width="full" padding="48px,9%" background="#ffffff" spacing="42px">
@@ -10,7 +10,7 @@
             ("gp4plus_6a76e79598ed9.png", "Bilancia Helmac GP4 PLUS"),
             ("gp-touch-self-icona_6a76e5c35d0c4.png", "Bilancia Helmac GP10/GP15 Self")
         ] %}
-        {% for image, name in sip_products %}<SIPProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}
+        {% for image, name in sip_products %}<ProductCard image="{{ image }}" name="{{ name }}" />{% endfor %}
     </Grid>
     <Column spacing="8px"><Text type="h2" size="29px" font="black" color="#737373">Casse</Text><Divider thickness="3px" width="55px" background="#68a7dd" /></Column>
     <Row padding="25px" background="#f1f7fc" radius="medium" justify="between" align="center"><Column spacing="8px"><Text size="24px" font="black" color="#12609b">Tutto il necessario per il tuo punto vendita</Text><Text color="#64748b">Scopri casse, software, accessori e assistenza professionale.</Text></Column><Action type="link" route="/shop" background="#12609b" radius="small" padding="12px,22px"><Text color="#ffffff" font="bold">VAI ALLO SHOP</Text></Action></Row>

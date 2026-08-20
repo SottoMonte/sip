@@ -1,0 +1,7 @@
+<Row width="full" padding="20px,9%" background="#ffffff" align="center" spacing="14px" border="1px,solid,#eef2f6">
+    <Action type="link" route="/"><Text color="#12609b" font="bold" size="13px"><Icon name="bi-house-door" /> Home</Text></Action>
+    <Text color="#94a3b8">›</Text>
+    <Action type="link" route="/shop"><Text color="#12609b" font="bold" size="13px">Shop</Text></Action>
+    <Text color="#94a3b8">›</Text>
+    <Text color="#64748b" size="13px">{{ component.attributes.current }}</Text>
+</Row>

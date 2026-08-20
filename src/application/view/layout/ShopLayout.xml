@@ -1,0 +1,16 @@
+{% extends "Layout.xml" %}
+{% block content %}
+    <Row width="full" padding="20px,9%" background="#ffffff" align="center" spacing="14px" border="1px,solid,#eef2f6">
+        <Action type="link" route="/"><Text color="#12609b" font="bold" size="13px"><Icon name="bi-house-door" /> </Text><Text color="#12609b" font="bold" size="13px">Home</Text></Action>
+        <Text color="#94a3b8">›</Text>
+        <Action type="link" route="/shop"><Text color="#12609b" font="bold" size="13px">Shop</Text></Action>
+        <Text color="#94a3b8">›</Text>
+        <Text color="#64748b" size="13px">Catalogo</Text>
+    </Row>
+    <Row width="full" padding="48px,9%" align="start" spacing="35px" background="#ffffff" >
+        <ShopSidebar />
+        <Column width="calc(100% - 315px)" spacing="25px" expand="true">
+            {% block shop_content %}{% endblock %}
+        </Column>
+    </Row>
+{% endblock %}

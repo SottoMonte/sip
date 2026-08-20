@@ -53,18 +53,18 @@ roles:{
 
 routes: {
     // SIP Italia home
-    route:GET_INDEX := { path:"/"; method:"GET"; "type":"view"; view:"home/index.xml" };
-    route:GET_LANDING := { path:"/it/home"; method:"GET"; "type":"view"; view:"home/index.xml" };
+    route:GET_INDEX := { path:"/"; method:"GET"; "type":"view"; view:"home/Home.xml" };
+    route:GET_LANDING := { path:"/it/home"; method:"GET"; "type":"view"; view:"home/Home.xml" };
     // SIP Italia landing sections and catalog entry points
-    route:GET_AZIENDA := { path:"/azienda"; method:"GET"; "type":"view"; view:"company/index.xml" };
-    route:GET_SHOP := { path:"/shop"; method:"GET"; "type":"view"; view:"shop/index.xml" };
-    route:GET_SHOP_BILANCE := { path:"/shop/bilance"; method:"GET"; "type":"view"; view:"home/index.xml" };
-    route:GET_SHOP_ATTREZZATURE := { path:"/shop/attrezzature"; method:"GET"; "type":"view"; view:"shop/index.xml" };
-    route:GET_SHOP_SOFTWARE := { path:"/shop/software"; method:"GET"; "type":"view"; view:"shop/index.xml" };
-    route:GET_SHOP_ACCESSORI := { path:"/shop/accessori"; method:"GET"; "type":"view"; view:"shop/index.xml" };
-    route:GET_ASSISTENZA := { path:"/assistenza"; method:"GET"; "type":"view"; view:"support/index.xml" };
-    route:GET_NEWS := { path:"/news"; method:"GET"; "type":"view"; view:"news/index.xml" };
-    route:GET_CONTATTI := { path:"/contatti"; method:"GET"; "type":"view"; view:"contact/index.xml" };
+    route:GET_AZIENDA := { path:"/azienda"; method:"GET"; "type":"view"; view:"company/Company.xml" };
+    route:GET_SHOP := { path:"/shop"; method:"GET"; "type":"view"; view:"shop/Shop.xml" };
+    route:GET_SHOP_BILANCE := { path:"/shop/bilance"; method:"GET"; "type":"view"; view:"home/Home.xml" };
+    route:GET_SHOP_ATTREZZATURE := { path:"/shop/attrezzature"; method:"GET"; "type":"view"; view:"shop/Shop.xml" };
+    route:GET_SHOP_SOFTWARE := { path:"/shop/software"; method:"GET"; "type":"view"; view:"shop/Shop.xml" };
+    route:GET_SHOP_ACCESSORI := { path:"/shop/accessori"; method:"GET"; "type":"view"; view:"shop/Shop.xml" };
+    route:GET_ASSISTENZA := { path:"/assistenza"; method:"GET"; "type":"view"; view:"support/Support.xml" };
+    route:GET_NEWS := { path:"/news"; method:"GET"; "type":"view"; view:"news/News.xml" };
+    route:GET_CONTATTI := { path:"/contatti"; method:"GET"; "type":"view"; view:"contact/Contact.xml" };
     route:GET_PROFILE := { path:"/profile"; method:"GET"; "type":"view"; view:"profile.xml" };
     // Auth
     route:GET_LOGIN := { path:"/login"; method:"GET"; "type":"view"; view:"auth/login.xml" };
