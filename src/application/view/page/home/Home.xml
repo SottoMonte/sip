@@ -1,6 +1,5 @@
 {% extends "Layout.xml" %}
 {% block title %}SIP Italia - Bilance e attrezzature professionali{% endblock %}
-{% block breadcrumb %}{% endblock %}
 {% block content %}
 <Column width="full" background="#ffffff" spacing="42px">
     <Row width="full" padding="58px,9%" background="#eaf4fb" align="center" justify="between" spacing="30px" class="flex-col md:flex-row">

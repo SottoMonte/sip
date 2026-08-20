@@ -1,13 +1,5 @@
 {% extends "Layout.xml" %}
-{% block breadcrumb %}{% endblock %}
 {% block content %}
-    <Row width="full" padding="15px,9%" background="#f8fbfe" align="center" spacing="14px" border="1px,solid,#e5edf5">
-        <Action type="link" route="/"><Text color="#12609b" font="bold" size="13px"><Icon name="bi-house-door" /> </Text><Text color="#12609b" font="bold" size="13px">Home</Text></Action>
-        <Text color="#94a3b8">›</Text>
-        <Action type="link" route="/shop"><Text color="#12609b" font="bold" size="13px">Shop</Text></Action>
-        <Text color="#94a3b8">›</Text>
-        <Text color="#64748b" size="13px" font="bold">Catalogo</Text>
-    </Row>
     <Row width="full" padding="42px,9%" align="start" spacing="35px" background="#f8fbfe" class="flex-col lg:flex-row">
         <ShopSidebar />
         <Column width="calc(100% - 315px)" spacing="25px" expand="true">

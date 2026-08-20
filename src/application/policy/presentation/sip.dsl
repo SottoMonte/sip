@@ -73,6 +73,7 @@ routes: {
     route:GET_CART_REMOVE := { path:"/shop/cart/remove"; method:"GET"; "type":"view"; view:"cart/Cart.xml"; controller:"cart" };
     route:GET_CHECKOUT := { path:"/shop/checkout"; method:"GET"; "type":"view"; view:"checkout/Checkout.xml"; controller:"checkout" };
     route:POST_ORDER := { path:"/shop/order/confirmation"; method:"POST"; "type":"view"; view:"order/Confirmation.xml"; controller:"checkout" };
+    route:GET_ORDER_CONFIRMATION := { path:"/shop/order/confirmation"; method:"GET"; "type":"view"; view:"order/Confirmation.xml"; controller:"checkout" };
     route:GET_ACCOUNT := { path:"/account"; method:"GET"; "type":"view"; view:"account/Account.xml"; controller:"account" };
     route:GET_ACCOUNT_LOGIN := { path:"/account/login"; method:"GET"; "type":"view"; view:"account/Login.xml"; controller:"account" };
     route:POST_ACCOUNT_LOGIN := { path:"/account/login"; method:"POST"; "type":"authenticate"; view:"account/Account.xml" };
@@ -142,7 +143,7 @@ rules : {
     "/shop/cart": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/shop/cart/remove": [policies.GET_ALLOW_ALL];
     "/shop/checkout": [policies.GET_ALLOW_ALL];
-    "/shop/order/confirmation": [policies.POST_ALLOW_ALL];
+    "/shop/order/confirmation": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/account": [policies.GET_ALLOW_ALL];
     "/account/login": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/account/register": [policies.GET_ALLOW_ALL];

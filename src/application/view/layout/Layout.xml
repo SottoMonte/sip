@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Window type="page" title="{% block title %}SIP Italia{% endblock %}" background="#ffffff" padding="0" style="min-height:100vh;display:flex;flex-direction:column;">
     <Header />
-    {% block breadcrumb %}
-    <Row width="full" padding="15px,9%" background="#f8fbfe" align="center" spacing="14px" border="1px,solid,#e5edf5">
-        <Action type="link" route="/"><Text color="#12609b" font="bold" size="13px"><Icon name="bi-house-door" /> Home</Text></Action>
-        <Text color="#94a3b8">›</Text>
-        <Text color="#64748b" font="bold" size="13px">{% block breadcrumb_label %}Pagina{% endblock %}</Text>
-    </Row>
-    {% endblock %}
+    <Breadcrumb />
     <Column width="full" min-height="calc(100vh - 180px)" expand="true" background="#ffffff" style="flex:1;">
         {% block content %}{% endblock %}
     </Column>
