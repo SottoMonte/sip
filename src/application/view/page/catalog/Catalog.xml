@@ -7,7 +7,7 @@
         <Action type="link" route="/shop/cart" border="1px,solid,#68a7dd" radius="small" padding="12px,18px"><Text color="#12609b" font="bold"><Icon name="bi-cart3" /> Vai al carrello</Text></Action>
     </Row>
     <Row justify="between" align="center" spacing="12px" class="flex-col sm:flex-row">
-        <Text color="#64748b">24 prodotti disponibili</Text>
+        <Text color="#64748b">{{ catalog.products | length }} prodotti disponibili</Text>
         <Input type="text" name="sort" value="In evidenza" width="210px" border="1px,solid,#cbdceb" padding="10px" readonly="true" />
     </Row>
     <Grid spacing="18px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
