@@ -1,0 +1,5 @@
+{% extends "sip.xml" %}
+{% block title %}SIP Italia - News{% endblock %}
+{% block content %}
+<Column padding="70px,9%" spacing="22px"><Text type="h1" size="42px" font="black" color="#12609b">News</Text><Text size="18px" color="#64748b">Aggiornamenti, novità e consigli per la tua attività.</Text><Column padding="28px" background="#ffffff" radius="medium" border="1px,solid,#e2e8f0" spacing="10px"><Text color="#68a7dd" font="bold">SIP Italia</Text><Text type="h2" size="25px" font="black" color="#172033">Soluzioni professionali per il punto vendita</Text><Text color="#64748b">Scopri il nostro catalogo e contatta il team per una consulenza dedicata.</Text><Action type="link" route="/shop"><Text color="#12609b" font="bold">Vai allo shop →</Text></Action></Column></Column>
+{% endblock %}

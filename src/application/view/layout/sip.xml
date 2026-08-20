@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window type="page" title="{% block title %}SIP Italia{% endblock %}" background="#ffffff" padding="0">
+    <SIPHeader />
+    <Column width="full" min-height="calc(100vh - 180px)" expand="true" background="#ffffff">
+        {% block content %}{% endblock %}
+    </Column>
+    <SIPFooter />
+</Window>

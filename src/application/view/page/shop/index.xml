@@ -1,0 +1,5 @@
+{% extends "sip.xml" %}
+{% block title %}SIP Italia - Shop{% endblock %}
+{% block content %}
+<Column padding="70px,9%" spacing="28px"><Text type="h1" size="42px" font="black" color="#12609b">Shop</Text><Text size="18px" color="#64748b">Scegli la categoria che ti interessa.</Text><Grid spacing="18px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));"><Action type="link" route="/shop/bilance" background="#ffffff" padding="28px" radius="medium" border="1px,solid,#e2e8f0"><Text color="#12609b" font="black" size="22px">Bilance</Text><Text color="#64748b">Precisione per ogni banco.</Text></Action><Action type="link" route="/shop/attrezzature" background="#ffffff" padding="28px" radius="medium" border="1px,solid,#e2e8f0"><Text color="#12609b" font="black" size="22px">Attrezzature</Text><Text color="#64748b">Soluzioni professionali.</Text></Action><Action type="link" route="/shop/software" background="#ffffff" padding="28px" radius="medium" border="1px,solid,#e2e8f0"><Text color="#12609b" font="black" size="22px">Casse e software</Text><Text color="#64748b">Gestione semplice e completa.</Text></Action></Grid></Column>
+{% endblock %}

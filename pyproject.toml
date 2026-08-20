@@ -3,6 +3,7 @@ name = "com.example" # Reverse domain name notation example: from example.com to
 version = "0.1.0"
 description = "Your project description"
 readme = "README.md"
+key = "sip-italia-local-development-key"
 
 dependencies = [
     "jinja2",
@@ -26,7 +27,7 @@ version = "main"
 [manager.defender]
 soglia_tentativi = 5
 timeout_blocchi = 3600
-presentation = "demo.dsl"
+presentation = "sip.dsl"
 
 # persistence = "redis.toml"
 # message = "log.toml"
@@ -53,8 +54,9 @@ name = "broker"
 # PRESENTATION
 # ============================================================
 
-# [[presentation.console]]
-# name = "tui"
+[presentation.starlette]
+adapter = "backend"
+port = "5000"
 
 
 # ============================================================

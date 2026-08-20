@@ -1,0 +1,3 @@
+<Column width="full" padding="25px,9%" background="#12609b" spacing="10px">
+    <Row justify="between" align="center" class="flex-col md:flex-row"><Text color="#ffffff" font="bold">S.I.P Italia</Text><Text color="#dbeafe" size="13px">© 2026 - info@sip-italia.com - +39 366 539 1867</Text></Row>
+</Column>
