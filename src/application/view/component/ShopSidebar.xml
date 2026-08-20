@@ -1,13 +1,13 @@
-<Column width="280px" padding="24px" background="#ffffff" radius="medium" border="1px,solid,#e2e8f0" spacing="18px" class="shrink-0 shadow-sm">
-    <Text color="#12609b" font="black" size="20px">Filtra il catalogo</Text>
+<Column width="280px" padding="24px" background="#ffffff" radius="large" border="1px,solid,#dce8f1" spacing="18px" class="shrink-0 shadow-md">
+    <Row align="center" spacing="10px"><Column width="34px" height="34px" background="#e4f3ff" radius="small" align="center" justify="center"><Icon name="bi-sliders" color="#12609b" /></Column><Text color="#0b4777" font="black" size="20px">Filtra il catalogo</Text></Row>
     <Text color="#64748b" size="13px">Trova rapidamente la soluzione giusta.</Text>
     <Text color="#172033" font="black" size="16px">Marche</Text>
     <Divider thickness="2px" width="80px" background="#12609b" />
     <Column spacing="0px">
-        <Action type="link" route="/shop/bilance" padding="10px,0"><Text color="#68a7dd">Helmac</Text></Action>
-        <Action type="link" route="/shop/attrezzature" padding="10px,0"><Text color="#68a7dd">Cashmatic</Text></Action>
-        <Action type="link" route="/shop/software" padding="10px,0"><Text color="#68a7dd">Rch</Text></Action>
-        <Action type="link" route="/shop/accessori" padding="10px,0"><Text color="#68a7dd">Smeg</Text></Action>
+        <Action type="link" route="/shop/bilance" padding="10px,0" class="transition hover:translate-x-1"><Text color="#12609b">Helmac</Text></Action>
+        <Action type="link" route="/shop/attrezzature" padding="10px,0" class="transition hover:translate-x-1"><Text color="#12609b">Cashmatic</Text></Action>
+        <Action type="link" route="/shop/software" padding="10px,0" class="transition hover:translate-x-1"><Text color="#12609b">Rch</Text></Action>
+        <Action type="link" route="/shop/accessori" padding="10px,0" class="transition hover:translate-x-1"><Text color="#12609b">Smeg</Text></Action>
     </Column>
     <Column padding="15px" background="#f1f7fc" radius="small" spacing="10px">
         <Text color="#172033" font="bold" size="13px">Cerca nel catalogo</Text>

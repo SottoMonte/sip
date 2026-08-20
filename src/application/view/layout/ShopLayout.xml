@@ -1,6 +1,6 @@
 {% extends "Layout.xml" %}
 {% block content %}
-    <Row width="full" padding="42px,9%" align="start" spacing="35px" background="#f8fbfe" class="flex-col lg:flex-row">
+    <Row width="full" padding="48px,9%" align="start" spacing="32px" background="#f6f9fc" class="flex-col lg:flex-row">
         <ShopSidebar />
         <Column width="calc(100% - 315px)" spacing="25px" expand="true">
             {% block shop_content %}{% endblock %}

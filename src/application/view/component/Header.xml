@@ -1,24 +1,24 @@
-<Column width="full" background="#ffffff">
-    <Row padding="7px,8%" background="#f1f7fc" align="center" justify="between" class="flex-col sm:flex-row">
-        <Row spacing="18px"><Action type="link" route="mailto:info@sip-italia.com"><Text size="12px" color="#12609b"><Icon name="bi-envelope-fill" /> info@sip-italia.com</Text></Action><Action type="link" route="tel:+393665391867"><Text size="12px" color="#12609b"><Icon name="bi-telephone-fill" /> +393665391867</Text></Action></Row>
-        <Text size="12px" color="#64748b">Soluzioni professionali per il tuo punto vendita</Text>
+<Column width="full" background="#ffffff" class="shadow-sm">
+    <Row padding="8px,8%" background="#092f52" align="center" justify="between" class="flex-col gap-2 sm:flex-row">
+        <Row spacing="18px"><Action type="link" route="mailto:info@sip-italia.com"><Text size="12px" color="#d9efff"><Icon name="bi-envelope-fill" /> info@sip-italia.com</Text></Action><Action type="link" route="tel:+393665391867"><Text size="12px" color="#d9efff"><Icon name="bi-telephone-fill" /> +393665391867</Text></Action></Row>
+        <Text size="12px" color="#9ed4f5">Soluzioni professionali per il tuo punto vendita</Text>
     </Row>
-    <Row padding="20px,8%" align="center" justify="between" spacing="25px" class="flex-col md:flex-row">
-        <Action type="link" route="/"><Row align="center" spacing="8px"><Icon name="bi-gear-wide-connected" size="42px" color="#12609b" /><Column spacing="0px"><Text size="32px" font="black" color="#12609b" spacing="3px">S.I.P</Text><Text size="7px" color="#64748b" uppercase="true">Sistemi informatici professionali</Text></Column></Row></Action>
+    <Row padding="21px,8%" align="center" justify="between" spacing="25px" class="flex-col md:flex-row">
+        <Action type="link" route="/"><Row align="center" spacing="10px"><Column width="46px" height="46px" align="center" justify="center" background="#e4f3ff" radius="medium"><Icon name="bi-gear-wide-connected" size="29px" color="#12609b" /></Column><Column spacing="0px"><Text size="31px" font="black" color="#0b4777" spacing="3px">S.I.P</Text><Text size="8px" color="#64748b" uppercase="true">Sistemi informatici professionali</Text></Column></Row></Action>
         <Action type="form" route="/shop/catalog" act="GET" width="min(575px, 100%)">
-            <Row width="full" height="44px" border="2px,solid,#68a7dd" radius="small" padding="0,8px,0,15px" align="center" justify="between" background="#ffffff">
+            <Row width="full" height="46px" border="1px,solid,#b8d6eb" radius="medium" padding="0,8px,0,15px" align="center" justify="between" background="#f8fbfe" class="focus-within:ring-2 focus-within:ring-[#68a7dd]">
                 <Input type="search" name="q" placeholder="Cerca prodotti..." width="full" height="38px" border="0" background="transparent" color="#172033" />
                 <Action type="submit" padding="8px" background="transparent"><Icon name="bi-search" color="#68a7dd" size="20px" /></Action>
             </Row>
         </Action>
         <Row spacing="24px" align="center"><Action type="link" route="/account"><Icon name="bi-person-fill" color="#172033" size="23px" /></Action><Action type="link" route="/shop/cart"><Icon name="bi-cart3" color="#172033" size="23px" /></Action></Row>
     </Row>
-    <Row width="full" padding="17px,9%" background="#12609b" align="center" spacing="42px" class="flex-col md:flex-row">
+    <Row width="full" padding="15px,9%" background="#12609b" align="center" spacing="34px" class="flex-col md:flex-row">
         <Action type="link" route="/azienda"><Text color="#ffffff" font="bold">Azienda</Text></Action>
         <Action type="link" route="/shop"><Text color="#ffffff" font="bold">Shop</Text></Action>
         <Action type="link" route="/assistenza"><Text color="#ffffff" font="bold">Assistenza</Text></Action>
         <Action type="link" route="/news"><Text color="#ffffff" font="bold">News</Text></Action>
         <Action type="link" route="/contatti"><Text color="#ffffff" font="bold">Contatti</Text></Action>
-        <Action type="link" route="https://wa.me/393665391867" class="md:ml-auto"><Text color="#ffffff" font="bold" size="19px"><Icon name="bi-whatsapp" /> Whatsapp</Text></Action>
+        <Action type="link" route="https://wa.me/393665391867" background="#25d366" radius="full" padding="8px,14px" class="md:ml-auto"><Text color="#ffffff" font="bold" size="14px"><Icon name="bi-whatsapp" /> Whatsapp</Text></Action>
     </Row>
 </Column>

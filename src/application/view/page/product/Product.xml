@@ -2,14 +2,14 @@
 {% block title %}Prodotto - SIP Italia{% endblock %}
 {% block shop_content %}
 <Row spacing="42px" align="start" class="flex-col lg:flex-row">
-    <Column width="full" height="420px" background="#eaf4fb" radius="medium" align="center" justify="center" class="lg:w-1/2"><Icon name="bi-speedometer2" size="110px" color="#68a7dd" /><Text color="#12609b" font="black" size="22px">Bilancia Touch 15</Text></Column>
+<Column width="full" height="420px" background="#eaf4fb" radius="large" align="center" justify="center" border="1px,solid,#d5e9f6" shadow="medium" class="lg:w-1/2"><Column width="150px" height="150px" background="#ffffff" radius="full" align="center" justify="center" shadow="small"><Icon name="bi-speedometer2" size="74px" color="#68a7dd" /></Column><Text color="#12609b" font="black" size="22px">Bilancia Touch 15</Text></Column>
     <Column spacing="18px" class="lg:w-1/2">
         <Text color="#68a7dd" font="bold" uppercase="true">Helmac · Bilance</Text>
         <Text type="h1" size="38px" font="black" color="#12609b">{{ product.product.name }}</Text>
         <Text color="#64748b" size="17px">{{ product.product.description }}</Text>
         <Text color="#12609b" font="black" size="30px">€ {{ "%.2f"|format(product.product.price) }}</Text>
         <Text color="#16805c" font="bold"><Icon name="bi-check-circle-fill" /> Disponibile · consegna in 3-5 giorni</Text>
-        <Row align="center" spacing="12px"><Input type="number" name="quantity" value="1" min="1" width="90px" border="1px,solid,#cbdceb" padding="12px" /><Action type="form" route="/shop/cart" act="POST" background="#12609b" radius="small" padding="14px,24px"><Text color="#ffffff" font="bold"><Icon name="bi-cart-plus" /> Aggiungi al carrello</Text></Action></Row>
+        <Row align="center" spacing="12px"><Input type="number" name="quantity" value="1" min="1" width="90px" border="1px,solid,#cbdceb" padding="12px" radius="small" background="#ffffff" /><Action type="form" route="/shop/cart" act="POST" background="#12609b" radius="small" padding="14px,24px" shadow="medium" class="transition hover:bg-[#0b4777]"><Text color="#ffffff" font="bold"><Icon name="bi-cart-plus" /> Aggiungi al carrello</Text></Action></Row>
         <Divider />
         <Text color="#172033" font="bold">Caratteristiche</Text><Text color="#64748b">Display 15&quot; · portata 30 kg · precisione 1 g · Wi-Fi · garanzia 24 mesi.</Text>
     </Column>

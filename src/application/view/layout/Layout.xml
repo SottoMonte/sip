@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Window type="page" title="{% block title %}SIP Italia{% endblock %}" background="#ffffff" padding="0" style="min-height:100vh;display:flex;flex-direction:column;">
+<Window type="page" title="{% block title %}SIP Italia{% endblock %}" background="#f6f9fc" padding="0" style="min-height:100vh;display:flex;flex-direction:column;">
     <Header />
     <Breadcrumb />
-    <Column width="full" min-height="calc(100vh - 180px)" expand="true" background="#ffffff" style="flex:1;">
+    <Column width="full" min-height="calc(100vh - 180px)" expand="true" background="#f6f9fc" style="flex:1;">
         {% block content %}{% endblock %}
     </Column>
     <Footer />
