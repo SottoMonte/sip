@@ -1,0 +1,5 @@
+{% extends "Layout.xml" %}
+{% block title %}Prenotazioni - SIP Italia{% endblock %}
+{% block content %}
+<Column padding="60px,9%" spacing="24px" background="#f8fbfe"><Column spacing="6px"><Text color="#68a7dd" font="bold" uppercase="true">Supporto</Text><Text type="h1" size="36px" font="black" color="#12609b">Le mie prenotazioni</Text><Text color="#64748b">Interventi tecnici, installazioni e appuntamenti.</Text></Column><Column background="#ffffff" padding="22px" radius="medium" border="1px,solid,#e2e8f0" spacing="12px"><Row justify="between"><Text color="#12609b" font="bold">Installazione e formazione</Text><Text color="#68a7dd" font="bold">25 agosto 2026</Text></Row><Text color="#64748b">Videocall · 10:30 · Tecnico SIP assegnato</Text><Action type="link" route="/account/bookings/reschedule"><Text color="#12609b" font="bold">Gestisci appuntamento</Text></Action></Column><Action type="link" route="/account/bookings/new" border="1px,solid,#68a7dd" radius="small" padding="13px,18px"><Text color="#12609b" font="bold"><Icon name="bi-calendar-plus" /> Prenota un intervento</Text></Action></Column>
+{% endblock %}

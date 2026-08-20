@@ -1,0 +1,5 @@
+{% extends "Layout.xml" %}
+{% block title %}I miei prodotti - SIP Italia{% endblock %}
+{% block content %}
+<Column padding="60px,9%" spacing="24px" background="#f8fbfe"><Column spacing="6px"><Text color="#68a7dd" font="bold" uppercase="true">Account</Text><Text type="h1" size="36px" font="black" color="#12609b">I miei prodotti</Text><Text color="#64748b">Inventario delle attrezzature acquistate e attive.</Text></Column><Column background="#ffffff" padding="22px" radius="medium" border="1px,solid,#e2e8f0" spacing="16px"><Row justify="between" align="center"><Column spacing="4px"><Text color="#12609b" font="black" size="18px">Bilancia Touch 15</Text><Text color="#64748b">Seriale: SIP-GP15-002481 · Acquistata il 20/08/2026</Text></Column><Text color="#16805c" font="bold" size="12px"><Icon name="bi-shield-check" /> In garanzia</Text></Row><Divider /><Row justify="between"><Text color="#64748b">Garanzia valida fino al 20/08/2028</Text><Action type="link" route="/account/tickets/new"><Text color="#12609b" font="bold">Richiedi assistenza</Text></Action></Row></Column></Column>
+{% endblock %}
