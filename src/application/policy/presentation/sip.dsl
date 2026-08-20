@@ -75,6 +75,14 @@ routes: {
     route:POST_ORDER := { path:"/shop/order/confirmation"; method:"POST"; "type":"view"; view:"order/Confirmation.xml"; controller:"checkout" };
     route:GET_ORDER_CONFIRMATION := { path:"/shop/order/confirmation"; method:"GET"; "type":"view"; view:"order/Confirmation.xml"; controller:"checkout" };
     route:GET_ACCOUNT := { path:"/account"; method:"GET"; "type":"view"; view:"account/Account.xml"; controller:"account" };
+    route:GET_ACCOUNT_PROFILE := { path:"/account/profile"; method:"GET"; "type":"view"; view:"account/Profile.xml"; controller:"account" };
+    route:POST_ACCOUNT_PROFILE := { path:"/account/profile"; method:"POST"; "type":"view"; view:"account/Profile.xml"; controller:"account" };
+    route:GET_ACCOUNT_ADDRESSES := { path:"/account/addresses"; method:"GET"; "type":"view"; view:"account/Addresses.xml"; controller:"account" };
+    route:GET_ACCOUNT_ADDRESS_NEW := { path:"/account/addresses/new"; method:"GET"; "type":"view"; view:"account/Addresses.xml"; controller:"account" };
+    route:GET_ACCOUNT_ADDRESS_EDIT := { path:"/account/addresses/edit"; method:"GET"; "type":"view"; view:"account/Addresses.xml"; controller:"account" };
+    route:GET_ACCOUNT_ADDRESS_REMOVE := { path:"/account/addresses/remove"; method:"GET"; "type":"view"; view:"account/Addresses.xml"; controller:"account" };
+    route:GET_ACCOUNT_SECURITY := { path:"/account/security"; method:"GET"; "type":"view"; view:"account/Security.xml"; controller:"account" };
+    route:POST_ACCOUNT_SECURITY := { path:"/account/security"; method:"POST"; "type":"view"; view:"account/Security.xml"; controller:"account" };
     route:GET_ACCOUNT_LOGIN := { path:"/account/login"; method:"GET"; "type":"view"; view:"account/Login.xml"; controller:"account" };
     route:POST_ACCOUNT_LOGIN := { path:"/account/login"; method:"POST"; "type":"authenticate"; view:"account/Account.xml" };
     route:GET_ACCOUNT_REGISTER := { path:"/account/register"; method:"GET"; "type":"view"; view:"account/Login.xml" };
@@ -145,6 +153,12 @@ rules : {
     "/shop/checkout": [policies.GET_ALLOW_ALL];
     "/shop/order/confirmation": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/account": [policies.GET_ALLOW_ALL];
+    "/account/profile": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
+    "/account/addresses": [policies.GET_ALLOW_ALL];
+    "/account/addresses/new": [policies.GET_ALLOW_ALL];
+    "/account/addresses/edit": [policies.GET_ALLOW_ALL];
+    "/account/addresses/remove": [policies.GET_ALLOW_ALL];
+    "/account/security": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/account/login": [policies.GET_ALLOW_ALL, policies.POST_ALLOW_ALL];
     "/account/register": [policies.GET_ALLOW_ALL];
     "/account/orders": [policies.GET_ALLOW_ALL];
