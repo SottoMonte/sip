@@ -1,0 +1,5 @@
+{% extends "Layout.xml" %}
+{% block title %}Il mio account - SIP Italia{% endblock %}
+{% block content %}
+<Column padding="75px,12%" spacing="25px"><Text color="#68a7dd" font="bold" uppercase="true">Area personale</Text><Text type="h1" size="42px" font="black" color="#12609b">Il mio account</Text><Grid spacing="18px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));"><Action type="link" route="/account/orders" background="#f5f9fc" padding="25px" radius="medium"><Text color="#12609b" font="black" size="20px">I miei ordini</Text><Text color="#64748b">Controlla stato e storico.</Text></Action><Action type="link" route="/account/profile" background="#f5f9fc" padding="25px" radius="medium"><Text color="#12609b" font="black" size="20px">Dati personali</Text><Text color="#64748b">Gestisci indirizzi e contatti.</Text></Action></Grid></Column>
+{% endblock %}

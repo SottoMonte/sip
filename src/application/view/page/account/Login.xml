@@ -1,0 +1,5 @@
+{% extends "Layout.xml" %}
+{% block title %}Accedi - SIP Italia{% endblock %}
+{% block content %}
+<Column padding="75px,12%" spacing="18px" align="center"><Text type="h1" size="36px" font="black" color="#12609b">Accedi al tuo account</Text><Action type="form" route="/account/login" act="POST" spacing="14px" width="min(430px, 100%)"><Input type="email" name="email" placeholder="Email" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" /><Input type="password" name="password" placeholder="Password" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" /><Action type="submit" background="#12609b" radius="small" padding="14px"><Text color="#ffffff" font="bold">Accedi</Text></Action></Action><Action type="link" route="/account/register"><Text color="#12609b">Non hai un account? Registrati</Text></Action></Column>
+{% endblock %}

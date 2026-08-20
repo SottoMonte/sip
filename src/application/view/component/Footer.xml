@@ -13,7 +13,9 @@
         <Column width="full" spacing="14px" class="md:w-1/5">
             <Text color="#ffffff" font="black" size="14px">Esplora</Text>
             <Action type="link" route="/azienda"><Text color="#c7e3f8" size="13px">Azienda</Text></Action>
-            <Action type="link" route="/shop"><Text color="#c7e3f8" size="13px">Shop prodotti</Text></Action>
+            <Action type="link" route="/shop/catalog"><Text color="#c7e3f8" size="13px">Shop prodotti</Text></Action>
+            <Action type="link" route="/shop/cart"><Text color="#c7e3f8" size="13px">Carrello</Text></Action>
+            <Action type="link" route="/account"><Text color="#c7e3f8" size="13px">Il mio account</Text></Action>
             <Action type="link" route="/news"><Text color="#c7e3f8" size="13px">News</Text></Action>
         </Column>
         <Column width="full" spacing="14px" class="md:w-1/5">

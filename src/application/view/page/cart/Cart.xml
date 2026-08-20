@@ -1,0 +1,17 @@
+{% extends "ShopLayout.xml" %}
+{% block title %}Carrello - SIP Italia{% endblock %}
+{% block shop_content %}
+<Column spacing="24px">
+    <Text type="h1" size="36px" font="black" color="#12609b">Il tuo carrello</Text>
+    <Column background="#ffffff" border="1px,solid,#e2e8f0" radius="medium" padding="22px" spacing="18px">
+        <Row align="center" justify="between" spacing="15px"><Text color="#172033" font="bold">Bilancia Touch 15</Text><Text color="#12609b" font="black">€ 849,00</Text></Row>
+        <Row align="center" justify="between"><Text color="#64748b">Quantità: 1</Text><Action type="link" route="/shop/cart/remove" ><Text color="#c24141"><Icon name="bi-trash" /> Rimuovi</Text></Action></Row>
+        <Divider />
+        <Row justify="between"><Text color="#64748b">Subtotale</Text><Text color="#172033" font="bold">€ 849,00</Text></Row>
+        <Row justify="between"><Text color="#64748b">Spedizione</Text><Text color="#16805c" font="bold">Gratuita</Text></Row>
+        <Row justify="between"><Text color="#12609b" font="black" size="21px">Totale</Text><Text color="#12609b" font="black" size="24px">€ 849,00</Text></Row>
+        <Action type="link" route="/shop/checkout" background="#12609b" radius="small" padding="15px"><Text color="#ffffff" font="bold" align="center">Procedi al checkout <Icon name="bi-arrow-right" /></Text></Action>
+    </Column>
+    <Action type="link" route="/shop/catalog"><Text color="#12609b" font="bold"><Icon name="bi-arrow-left" /> Continua gli acquisti</Text></Action>
+</Column>
+{% endblock %}

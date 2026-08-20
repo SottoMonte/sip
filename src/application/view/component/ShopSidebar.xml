@@ -16,4 +16,7 @@
     <Action type="link" route="/shop/bilance"><Text color="#68a7dd">Bilance</Text></Action>
     <Action type="link" route="/shop/attrezzature"><Text color="#68a7dd">Attrezzature</Text></Action>
     <Action type="link" route="/shop/software"><Text color="#68a7dd">Casse e software</Text></Action>
+    <Divider />
+    <Action type="link" route="/shop/cart" background="#12609b" radius="small" padding="12px"><Text color="#ffffff" font="bold"><Icon name="bi-cart3" /> Vai al carrello</Text></Action>
+    <Action type="link" route="/account" border="1px,solid,#68a7dd" radius="small" padding="12px"><Text color="#12609b" font="bold"><Icon name="bi-person" /> Il mio account</Text></Action>
 </Column>

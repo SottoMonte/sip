@@ -1,0 +1,20 @@
+{% extends "ShopLayout.xml" %}
+{% block title %}Catalogo prodotti - SIP Italia{% endblock %}
+{% block shop_content %}
+<Column spacing="24px">
+    <Row align="center" justify="between" class="flex-col sm:flex-row" spacing="15px">
+        <Column spacing="5px"><Text type="h1" size="36px" font="black" color="#12609b">Catalogo prodotti</Text><Text color="#64748b">Soluzioni professionali per il tuo punto vendita.</Text></Column>
+        <Action type="link" route="/shop/cart" border="1px,solid,#68a7dd" radius="small" padding="12px,18px"><Text color="#12609b" font="bold"><Icon name="bi-cart3" /> Vai al carrello</Text></Action>
+    </Row>
+    <Row justify="between" align="center" spacing="12px" class="flex-col sm:flex-row">
+        <Text color="#64748b">24 prodotti disponibili</Text>
+        <Input type="text" name="sort" value="In evidenza" width="210px" border="1px,solid,#cbdceb" padding="10px" readonly="true" />
+    </Row>
+    <Grid spacing="18px" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <Action type="link" route="/shop/product/bilancia-touch-15" background="#ffffff" padding="16px" radius="medium" border="1px,solid,#e2e8f0"><Icon name="bi-speedometer2" size="55px" color="#68a7dd" /><Text color="#12609b" font="black" size="17px">Bilancia Touch 15</Text><Text color="#64748b">Bilancia retail professionale</Text><Text color="#12609b" font="black" size="20px">€ 849,00</Text></Action>
+        <Action type="link" route="/shop/product/cassa-pos-pro" background="#ffffff" padding="16px" radius="medium" border="1px,solid,#e2e8f0"><Icon name="bi-shop" size="55px" color="#68a7dd" /><Text color="#12609b" font="black" size="17px">Cassa POS Pro</Text><Text color="#64748b">Postazione completa per il negozio</Text><Text color="#12609b" font="black" size="20px">€ 1.290,00</Text></Action>
+        <Action type="link" route="/shop/product/cashmatic-strong" background="#ffffff" padding="16px" radius="medium" border="1px,solid,#e2e8f0"><Icon name="bi-cash-coin" size="55px" color="#68a7dd" /><Text color="#12609b" font="black" size="17px">Cashmatic Strong</Text><Text color="#64748b">Gestore automatico di contanti</Text><Text color="#12609b" font="black" size="20px">€ 2.490,00</Text></Action>
+        <Action type="link" route="/shop/product/software-retail-suite" background="#ffffff" padding="16px" radius="medium" border="1px,solid,#e2e8f0"><Icon name="bi-grid-1x2" size="55px" color="#68a7dd" /><Text color="#12609b" font="black" size="17px">Retail Suite</Text><Text color="#64748b">Software gestionale completo</Text><Text color="#12609b" font="black" size="20px">€ 39,90 / mese</Text></Action>
+    </Grid>
+</Column>
+{% endblock %}

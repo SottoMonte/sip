@@ -1,0 +1,22 @@
+{% extends "ShopLayout.xml" %}
+{% block title %}Checkout - SIP Italia{% endblock %}
+{% block shop_content %}
+<Column spacing="25px">
+    <Text type="h1" size="36px" font="black" color="#12609b">Checkout</Text>
+    <Row spacing="30px" align="start" class="flex-col lg:flex-row">
+        <Column spacing="18px" class="lg:w-3/5">
+            <Text color="#172033" font="bold" size="20px">Dati di spedizione</Text>
+            <Action type="form" route="/shop/order/confirmation" act="POST" spacing="14px">
+                <Input type="text" name="name" placeholder="Nome e cognome" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" />
+                <Input type="email" name="email" placeholder="Email" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" />
+                <Input type="text" name="address" placeholder="Indirizzo e numero civico" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" />
+                <Row spacing="12px"><Input type="text" name="city" placeholder="Città" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" /><Input type="text" name="zip" placeholder="CAP" required="true" width="120px" border="1px,solid,#cbdceb" padding="13px" /></Row>
+                <Text color="#172033" font="bold" size="20px">Pagamento</Text>
+                <Input type="text" name="card" placeholder="Numero carta" required="true" width="full" border="1px,solid,#cbdceb" padding="13px" />
+                <Action type="submit" background="#12609b" radius="small" padding="15px"><Text color="#ffffff" font="bold">Conferma e paga € 849,00</Text></Action>
+            </Action>
+        </Column>
+        <Column spacing="14px" background="#f5f9fc" radius="medium" padding="22px" class="lg:w-2/5"><Text color="#172033" font="black" size="20px">Riepilogo ordine</Text><Text color="#64748b">Bilancia Touch 15 × 1</Text><Divider /><Row justify="between"><Text color="#64748b">Totale</Text><Text color="#12609b" font="black" size="22px">€ 849,00</Text></Row></Column>
+    </Row>
+</Column>
+{% endblock %}
